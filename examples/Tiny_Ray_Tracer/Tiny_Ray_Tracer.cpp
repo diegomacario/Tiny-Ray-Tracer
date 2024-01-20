@@ -341,6 +341,8 @@ void setup()
 
     spr.setSwapBytes(1);
 
+    spr.fillSprite(TFT_BLACK);
+
     // ---
 
     fileParser.reset(new FileParser(sceneDescription));
@@ -360,30 +362,33 @@ void setup()
 
     ray.origin = sceneDesc->getEye();
     ray.direction = Vector(0, 0, 0);
+}
 
-    // while(sampleGenerator->sampleIsAvailable())
-    // {
-    //     sampleGenerator->generateSample(sample);
-    //     rayGenerator->generateRay(sample, ray);
-
-    //     // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
-    //     // If not, the current pixel remains black
-    //     if (scene->findNearestIntersection(ray, &intersection))
-    //     {
-    //         film->exposePixel(scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection));
-    //     }
-
-    //     film->prepareNextPixel();
-    // }
+uint32_t rgbToUint32(uint8_t r, uint8_t g, uint8_t b) {
+    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
 }
 
 void loop()
 {
-    spr.fillSprite(TFT_BLACK);
-    spr.drawString("Hello World",20,20,4);
-    spr.fillRect(10,100,60,60,TFT_BLUE);
-    spr.fillRect(80,100,60,60,TFT_GREEN);
-    spr.fillRect(150,100,60,60,TFT_RED);
- 
-    amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+    if (sampleGenerator->sampleIsAvailable())
+    {
+        sampleGenerator->generateSample(sample);
+        rayGenerator->generateRay(sample, ray);
+
+        // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
+        // If not, the current pixel remains black
+        if (scene->findNearestIntersection(ray, &intersection))
+        {
+            Colour pixelColor = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
+            film->exposePixel(pixelColor);
+
+            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColor.r, 255.0f));
+            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColor.g, 255.0f));
+            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColor.b, 255.0f));            
+            spr.fillRect(sample.x, sample.y, 1, 1, rgbToUint32(r, g, b));
+            amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+        }
+
+        film->prepareNextPixel();
+    }
 }
