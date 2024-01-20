@@ -364,8 +364,8 @@ void setup()
     ray.direction = Vector(0, 0, 0);
 }
 
-uint32_t rgbToUint32(uint8_t r, uint8_t g, uint8_t b) {
-    return ((uint32_t)r << 16) | ((uint32_t)g << 8) | b;
+uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
 }
 
 void loop()
@@ -385,7 +385,7 @@ void loop()
             uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColor.r, 255.0f));
             uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColor.g, 255.0f));
             uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColor.b, 255.0f));            
-            spr.fillRect(sample.x, sample.y, 1, 1, rgbToUint32(r, g, b));
+            spr.fillRect(sample.x, sample.y, 1, 1, rgb888ToRgb565(r, g, b));
             amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
         }
 
