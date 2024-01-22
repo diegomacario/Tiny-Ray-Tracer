@@ -7,7 +7,6 @@
 #include "FileParser.h"
 #include "SampleGenerator.h"
 #include "RayGenerator.h"
-#include "Film.h"
 #include "SceneDescription.h"
 
 TFT_eSPI tft = TFT_eSPI();
@@ -322,7 +321,6 @@ std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
 std::unique_ptr<SampleGenerator> sampleGenerator = nullptr;
 std::unique_ptr<RayGenerator> rayGenerator = nullptr;
-std::unique_ptr<Film> film = nullptr;
 Sample sample;
 Ray ray;
 Intersection intersection;
@@ -358,8 +356,6 @@ void setup()
                              sceneDesc->getUpVec(),
                              sceneDesc->getFovy()));
 
-    film.reset(new Film(sceneDesc->getWidth(), sceneDesc->getHeight()));
-
     ray.origin = sceneDesc->getEye();
     ray.direction = Vector(0, 0, 0);
 }
@@ -380,7 +376,6 @@ void loop()
         if (scene->findNearestIntersection(ray, &intersection))
         {
             Colour pixelColor = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
-            film->exposePixel(pixelColor);
 
             uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColor.r, 255.0f));
             uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColor.g, 255.0f));
@@ -393,7 +388,5 @@ void loop()
             amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
             amoled.pushColors(pixelPtr, 1);
         }
-
-        film->prepareNextPixel();
     }
 }
