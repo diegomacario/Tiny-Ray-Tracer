@@ -2,6 +2,13 @@
 
 #include "SampleGenerator.h"
 
+SampleGenerator::SampleGenerator()
+   : width(0)
+   , height(0)
+   , x(0)
+   , y(0)
+{ }
+
 SampleGenerator::SampleGenerator(const int width, const int height)
    : width(width)
    , height(height)

@@ -316,11 +316,11 @@ tri 45 40 34
 popTransform
 )";
 
-std::unique_ptr<FileParser> fileParser = nullptr;
+FileParser fileParser(sceneDescription);
 std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
-std::unique_ptr<SampleGenerator> sampleGenerator = nullptr;
-std::unique_ptr<RayGenerator> rayGenerator = nullptr;
+SampleGenerator sampleGenerator;
+RayGenerator rayGenerator;
 Sample sample;
 Ray ray;
 Intersection intersection;
@@ -343,18 +343,16 @@ void setup()
 
     // ---
 
-    fileParser.reset(new FileParser(sceneDescription));
+    fileParser.readFile(sceneDesc, scene);
 
-    fileParser->readFile(sceneDesc, scene);
+    sampleGenerator = SampleGenerator(sceneDesc->getWidth(), sceneDesc->getHeight());
 
-    sampleGenerator.reset(new SampleGenerator(sceneDesc->getWidth(), sceneDesc->getHeight()));
-
-    rayGenerator.reset(new RayGenerator(sceneDesc->getWidth(),
-                             sceneDesc->getHeight(),
-                             sceneDesc->getEye(),
-                             sceneDesc->getCenter(),
-                             sceneDesc->getUpVec(),
-                             sceneDesc->getFovy()));
+    rayGenerator = RayGenerator(sceneDesc->getWidth(),
+                                sceneDesc->getHeight(),
+                                sceneDesc->getEye(),
+                                sceneDesc->getCenter(),
+                                sceneDesc->getUpVec(),
+                                sceneDesc->getFovy());
 
     ray.origin = sceneDesc->getEye();
     ray.direction = Vector(0, 0, 0);
@@ -366,10 +364,10 @@ uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
 
 void loop()
 {
-    if (sampleGenerator->sampleIsAvailable())
+    if (sampleGenerator.sampleIsAvailable())
     {
-        sampleGenerator->generateSample(sample);
-        rayGenerator->generateRay(sample, ray);
+        sampleGenerator.generateSample(sample);
+        rayGenerator.generateRay(sample, ray);
 
         // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
         // If not, the current pixel remains black

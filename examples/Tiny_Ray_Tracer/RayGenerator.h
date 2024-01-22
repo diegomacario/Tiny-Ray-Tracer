@@ -18,6 +18,7 @@ class RayGenerator
 {
 public:
 
+   RayGenerator();
    RayGenerator(const int width, const int height, const Point& eye, const Point& center, const Vector& up, float fovy);
    ~RayGenerator();
 

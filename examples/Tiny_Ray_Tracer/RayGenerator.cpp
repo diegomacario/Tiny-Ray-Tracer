@@ -3,6 +3,17 @@
 #include "Constants.h"
 #include "RayGenerator.h"
 
+RayGenerator::RayGenerator()
+   : width(0)
+   , height(0)
+   , eye()
+   , u()
+   , v()
+   , w()
+   , alpha(0.0f)
+   , beta(0.0f)
+{ }
+
 RayGenerator::RayGenerator(const int width, const int height, const Point& eye, const Point& center, const Vector& up, float fovy)
    : width(width)
    , height(height)

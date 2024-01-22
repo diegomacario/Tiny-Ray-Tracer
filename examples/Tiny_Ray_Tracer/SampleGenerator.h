@@ -18,6 +18,7 @@ class SampleGenerator
 {
 public:
 
+   SampleGenerator();
    SampleGenerator(const int width, const int height);
    ~SampleGenerator();
 
