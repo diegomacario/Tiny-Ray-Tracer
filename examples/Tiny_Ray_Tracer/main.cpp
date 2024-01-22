@@ -384,9 +384,14 @@ void loop()
 
             uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColor.r, 255.0f));
             uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColor.g, 255.0f));
-            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColor.b, 255.0f));            
-            spr.fillRect(sample.x, sample.y, 1, 1, rgb888ToRgb565(r, g, b));
-            amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColor.b, 255.0f));
+            uint32_t color = rgb888ToRgb565(r, g, b);
+
+            spr.drawPixel(sample.x, sample.y, color);
+            uint16_t* spritePtr = (uint16_t*)spr.getPointer();
+            uint16_t* pixelPtr = spritePtr + ((int)sample.y * WIDTH + (int)sample.x);
+            amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
+            amoled.pushColors(pixelPtr, 1);
         }
 
         film->prepareNextPixel();
