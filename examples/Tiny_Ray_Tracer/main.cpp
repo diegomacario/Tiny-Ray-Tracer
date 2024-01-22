@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "FileParser.h"
-#include "SampleGenerator.h"
+#include "RandomSampleGenerator.h"
 #include "RayGenerator.h"
 #include "SceneDescription.h"
 
@@ -319,7 +319,7 @@ popTransform
 FileParser fileParser(sceneDescription);
 std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
-SampleGenerator sampleGenerator;
+RandomSampleGenerator sampleGenerator;
 RayGenerator rayGenerator;
 Sample sample;
 Ray ray;
@@ -345,7 +345,7 @@ void setup()
 
     fileParser.readFile(sceneDesc, scene);
 
-    sampleGenerator = SampleGenerator(sceneDesc->getWidth(), sceneDesc->getHeight());
+    sampleGenerator = RandomSampleGenerator(sceneDesc->getWidth(), sceneDesc->getHeight());
 
     rayGenerator = RayGenerator(sceneDesc->getWidth(),
                                 sceneDesc->getHeight(),
