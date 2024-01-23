@@ -10,8 +10,9 @@
 #include "SceneDescription.h"
 
 TFT_eSPI tft = TFT_eSPI();
-TFT_eSprite spr = TFT_eSprite(&tft);
-TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
+//TFT_eSprite spr = TFT_eSprite(&tft);
+//TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
+TFT_eSprite percentageProgressSprite = TFT_eSprite(&tft);
 LilyGo_Class amoled;
 
 #define WIDTH  amoled.height()
@@ -334,6 +335,9 @@ const int32_t progressBarFillableWidth = progressBarWidth - 2;
 const int32_t progressBarFillableHeight = progressBarHeight - 2;
 int32_t prevProgressWidth = 0;
 bool doOnce = true;
+int32_t textSize = 4;
+int32_t fontHeight = 7;
+int32_t fontWidth = 5;
 
 void setup()
 {
@@ -345,16 +349,26 @@ void setup()
         }
     }
 
-    spr.createSprite(WIDTH, HEIGHT);
-    progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
+    //spr.createSprite(WIDTH, HEIGHT);
+    //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
+    percentageProgressSprite.createSprite(WIDTH, fontHeight * textSize);
 
-    spr.setSwapBytes(1);
-    progressBarSprite.setSwapBytes(1);
+    //spr.setSwapBytes(1);
+    //progressBarSprite.setSwapBytes(1);
+    percentageProgressSprite.setSwapBytes(1);
 
-    spr.fillSprite(TFT_BLACK);
-    progressBarSprite.fillSprite(TFT_BLACK);
+    //spr.fillSprite(TFT_BLACK);
+    //progressBarSprite.fillSprite(TFT_BLACK);
+    percentageProgressSprite.fillSprite(TFT_RED);
 
-    progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
+    //progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
+
+    percentageProgressSprite.setTextColor(TFT_WHITE);
+    percentageProgressSprite.setTextSize(textSize);
+    percentageProgressSprite.setTextFont(1);
+    percentageProgressSprite.drawFloat(0.0f, 1, WIDTH, 0);
+    percentageProgressSprite.setTextDatum(TR_DATUM);
+    amoled.pushColors(0, 0, WIDTH, fontHeight * textSize, (uint16_t *)percentageProgressSprite.getPointer());
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -375,6 +389,8 @@ uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
 }
 
+float testCounter = 0.0f;
+
 void loop()
 {
     if (sampleGenerator.sampleIsAvailable())
@@ -393,23 +409,29 @@ void loop()
             uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
             uint32_t colour = rgb888ToRgb565(r, g, b);
 
-            spr.drawPixel(sample.x, sample.y, colour);
-            uint16_t* spritePtr = (uint16_t*)spr.getPointer();
-            uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
-            amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
-            amoled.pushColors(pixelPtr, 1);
+            //spr.drawPixel(sample.x, sample.y, colour);
+            //uint16_t* spritePtr = (uint16_t*)spr.getPointer();
+            //uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
+            //amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
+            //amoled.pushColors(pixelPtr, 1);
         }
 
         float progress = sampleGenerator.getProgress();
         int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
         if (progressWidth > prevProgressWidth) {
-            progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
+            //progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
             prevProgressWidth = progressWidth;
         }
-        amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
+        //amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
     }
     else if (doOnce) {
-        amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+        //amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
         doOnce = false;
     }
+
+    percentageProgressSprite.fillSprite(TFT_RED);
+    //percentageProgressSprite.drawFloat(testCounter, 1, WIDTH, 0);
+    percentageProgressSprite.drawFloat(888.8f, 1, WIDTH, 0);
+    amoled.pushColors(0, 0, WIDTH, fontHeight * textSize, (uint16_t *)percentageProgressSprite.getPointer());
+    testCounter += 0.1f;
 }
