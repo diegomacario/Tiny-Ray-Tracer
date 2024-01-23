@@ -369,9 +369,9 @@ void setup()
     percentageProgressSprite.setTextColor(TFT_WHITE);
     percentageProgressSprite.setTextSize(textSize);
     percentageProgressSprite.setTextFont(1);
-    percentageProgressSprite.drawFloat(888.8f, 1, percentageProgressSpriteWidth, 0);
+    percentageProgressSprite.drawFloat(0.0f, 1, percentageProgressSpriteWidth, 0);
     percentageProgressSprite.setTextDatum(TR_DATUM);
-    amoled.pushColors(0, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+    amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -433,8 +433,7 @@ void loop()
     }
 
     percentageProgressSprite.fillSprite(TFT_RED);
-    //percentageProgressSprite.drawFloat(testCounter, 1, WIDTH, 0);
-    percentageProgressSprite.drawFloat(888.8f, 1, percentageProgressSpriteWidth, 0);
-    amoled.pushColors(0, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+    percentageProgressSprite.drawFloat(testCounter, 1, percentageProgressSpriteWidth, 0);
+    amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
     testCounter += 0.1f;
 }
