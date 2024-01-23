@@ -27,6 +27,8 @@ public:
 
    bool sampleIsAvailable();
 
+   float getProgress();
+
 private:
 
    // Number of pixels = Number of samples = width * height
@@ -34,6 +36,8 @@ private:
 
    std::vector<std::pair<int, int>> coordinates;
    std::vector<std::pair<int, int>>::iterator currentCoordinate;
+
+   unsigned int numSamplesGenerated;
 };
 
 #endif

@@ -10,6 +10,7 @@ RandomSampleGenerator::RandomSampleGenerator()
    , height(0)
    , coordinates()
    , currentCoordinate()
+   , numSamplesGenerated(0)
 { }
 
 RandomSampleGenerator::RandomSampleGenerator(const int width, const int height)
@@ -17,6 +18,7 @@ RandomSampleGenerator::RandomSampleGenerator(const int width, const int height)
    , height(height)
    , coordinates()
    , currentCoordinate()
+   , numSamplesGenerated(0)
 {
    // Generate all possible (x, y) pairs
    for (int y = 0; y < height; ++y)
@@ -47,11 +49,18 @@ void RandomSampleGenerator::generateSample(Sample& sample)
 
    // Move to the next coordinate in the shuffled list
    ++currentCoordinate;
+
+   // Increment the number of samples generated
+   ++numSamplesGenerated;
 }
 
 bool RandomSampleGenerator::sampleIsAvailable()
 {
-   // Check if we have reached the end of the shuffled list
-   return currentCoordinate != coordinates.end();
+   return (numSamplesGenerated != (width * height));
+}
+
+float RandomSampleGenerator::getProgress()
+{
+   return (static_cast<float>(numSamplesGenerated) / static_cast<float>(width * height));
 }
 
