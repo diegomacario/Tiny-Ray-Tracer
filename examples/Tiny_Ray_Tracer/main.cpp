@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #include "FileParser.h"
 #include "RandomSampleGenerator.h"
@@ -338,7 +340,7 @@ bool doOnce = true;
 int32_t textSize = 4;
 int32_t fontHeight = 8;
 int32_t fontWidth = 6;
-int32_t numCharacters = 5;
+int32_t numCharacters = 6;
 int32_t percentageProgressSpriteWidth = fontWidth * textSize * numCharacters;
 int32_t percentageProgressSpriteHeight = fontHeight * textSize;
 
@@ -369,7 +371,7 @@ void setup()
     percentageProgressSprite.setTextColor(TFT_WHITE);
     percentageProgressSprite.setTextSize(textSize);
     percentageProgressSprite.setTextFont(1);
-    percentageProgressSprite.drawFloat(0.0f, 1, percentageProgressSpriteWidth, 0);
+    percentageProgressSprite.drawString("0.0%", percentageProgressSpriteWidth, 0);
     percentageProgressSprite.setTextDatum(TR_DATUM);
     amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
 
@@ -433,7 +435,12 @@ void loop()
     }
 
     percentageProgressSprite.fillSprite(TFT_RED);
-    percentageProgressSprite.drawFloat(testCounter, 1, percentageProgressSpriteWidth, 0);
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(1) << testCounter;
+    std::string numberAsString = stream.str();
+    numberAsString += "%";
+    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteWidth, 0);
+
     amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
     testCounter += 0.1f;
 }
