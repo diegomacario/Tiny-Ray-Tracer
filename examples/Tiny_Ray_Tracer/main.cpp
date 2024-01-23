@@ -332,6 +332,7 @@ const int32_t progressBarXPosition = 18;
 const int32_t progressBarYPosition = 222;
 const int32_t progressBarFillableWidth = progressBarWidth - 2;
 const int32_t progressBarFillableHeight = progressBarHeight - 2;
+int32_t prevProgressWidth = 0;
 
 void setup()
 {
@@ -400,7 +401,10 @@ void loop()
 
         float progress = sampleGenerator.getProgress();
         int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
-        progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
+        if (progressWidth > prevProgressWidth) {
+            progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
+            prevProgressWidth = progressWidth;
+        }
         amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
     }
 }
