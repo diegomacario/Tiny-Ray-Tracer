@@ -330,6 +330,8 @@ const int32_t progressBarWidth = 500;
 const int32_t progressBarHeight = 10;
 const int32_t progressBarXPosition = 18;
 const int32_t progressBarYPosition = 222;
+const int32_t progressBarFillableWidth = progressBarWidth - 2;
+const int32_t progressBarFillableHeight = progressBarHeight - 2;
 
 void setup()
 {
@@ -351,7 +353,6 @@ void setup()
     progressBarSprite.fillSprite(TFT_BLACK);
 
     progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
-    progressBarSprite.fillRect(1, 1, progressBarWidth - 2, progressBarHeight - 2, TFT_GREEN);
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -398,6 +399,8 @@ void loop()
         }
 
         float progress = sampleGenerator.getProgress();
+        int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
+        progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
         amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
     }
 }
