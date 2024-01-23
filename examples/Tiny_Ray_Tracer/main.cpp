@@ -326,6 +326,11 @@ Sample sample;
 Ray ray;
 Intersection intersection;
 
+const int32_t progressBarWidth = 500;
+const int32_t progressBarHeight = 10;
+const int32_t progressBarXPosition = 18;
+const int32_t progressBarYPosition = 222;
+
 void setup()
 {
     Serial.begin(115200);
@@ -337,13 +342,16 @@ void setup()
     }
 
     spr.createSprite(WIDTH, HEIGHT);
-    progressBarSprite.createSprite(500, 10);
+    progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
 
     spr.setSwapBytes(1);
     progressBarSprite.setSwapBytes(1);
 
     spr.fillSprite(TFT_BLACK);
     progressBarSprite.fillSprite(TFT_BLACK);
+
+    progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
+    progressBarSprite.fillRect(1, 1, progressBarWidth - 2, progressBarHeight - 2, TFT_GREEN);
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -388,5 +396,8 @@ void loop()
             amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
             amoled.pushColors(pixelPtr, 1);
         }
+
+        float progress = sampleGenerator.getProgress();
+        amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
     }
 }
