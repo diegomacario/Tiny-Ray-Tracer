@@ -333,6 +333,7 @@ const int32_t progressBarYPosition = 222;
 const int32_t progressBarFillableWidth = progressBarWidth - 2;
 const int32_t progressBarFillableHeight = progressBarHeight - 2;
 int32_t prevProgressWidth = 0;
+bool doOnce = true;
 
 void setup()
 {
@@ -406,5 +407,9 @@ void loop()
             prevProgressWidth = progressWidth;
         }
         amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
+    }
+    else if (doOnce) {
+        amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+        doOnce = false;
     }
 }
