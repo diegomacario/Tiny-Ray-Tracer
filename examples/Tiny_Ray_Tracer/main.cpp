@@ -11,6 +11,7 @@
 
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite spr = TFT_eSprite(&tft);
+TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
 LilyGo_Class amoled;
 
 #define WIDTH  amoled.height()
@@ -336,12 +337,13 @@ void setup()
     }
 
     spr.createSprite(WIDTH, HEIGHT);
+    progressBarSprite.createSprite(500, 10);
 
     spr.setSwapBytes(1);
+    progressBarSprite.setSwapBytes(1);
 
     spr.fillSprite(TFT_BLACK);
-
-    // ---
+    progressBarSprite.fillSprite(TFT_BLACK);
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -373,16 +375,16 @@ void loop()
         // If not, the current pixel remains black
         if (scene->findNearestIntersection(ray, &intersection))
         {
-            Colour pixelColor = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
+            Colour pixelColour = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
 
-            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColor.r, 255.0f));
-            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColor.g, 255.0f));
-            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColor.b, 255.0f));
-            uint32_t color = rgb888ToRgb565(r, g, b);
+            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColour.r, 255.0f));
+            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColour.g, 255.0f));
+            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
+            uint32_t colour = rgb888ToRgb565(r, g, b);
 
-            spr.drawPixel(sample.x, sample.y, color);
+            spr.drawPixel(sample.x, sample.y, colour);
             uint16_t* spritePtr = (uint16_t*)spr.getPointer();
-            uint16_t* pixelPtr = spritePtr + ((int)sample.y * WIDTH + (int)sample.x);
+            uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
             amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
             amoled.pushColors(pixelPtr, 1);
         }
