@@ -11,16 +11,6 @@
 #include "RayGenerator.h"
 #include "SceneDescription.h"
 
-TFT_eSPI tft = TFT_eSPI();
-TFT_eSprite spr = TFT_eSprite(&tft);
-TFT_eSprite percentageProgressSprite = TFT_eSprite(&tft);
-TFT_eSprite rayTracingSprite = TFT_eSprite(&tft);
-TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
-LilyGo_Class amoled;
-
-#define WIDTH  amoled.height()
-#define HEIGHT amoled.width()
-
 std::string sceneDescription = R"(
 size 536 240
 output sword.png
@@ -321,6 +311,16 @@ tri 45 40 34
 popTransform
 )";
 
+TFT_eSPI tft = TFT_eSPI();
+TFT_eSprite spr = TFT_eSprite(&tft);
+TFT_eSprite percentageProgressSprite = TFT_eSprite(&tft);
+TFT_eSprite rayTracingSprite = TFT_eSprite(&tft);
+TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
+LilyGo_Class amoled;
+
+#define WIDTH  amoled.height()
+#define HEIGHT amoled.width()
+
 FileParser fileParser(sceneDescription);
 std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
@@ -329,15 +329,6 @@ RayGenerator rayGenerator;
 Sample sample;
 Ray ray;
 Intersection intersection;
-
-const int32_t progressBarWidth = 500;
-const int32_t progressBarHeight = 10;
-const int32_t progressBarXPosition = 18;
-const int32_t progressBarYPosition = 222;
-const int32_t progressBarFillableWidth = progressBarWidth - 2;
-const int32_t progressBarFillableHeight = progressBarHeight - 2;
-int32_t prevProgressWidth = 0;
-bool doOnce = true;
 
 struct TextSpriteSettings {
     TextSpriteSettings(int32_t textSize, int32_t fontHeight, int32_t fontWidth, std::string longestPossibleString)
@@ -357,11 +348,21 @@ struct TextSpriteSettings {
     int32_t spriteHeight;
 };
 
-TextSpriteSettings rayTracingSpriteSettings(4, 8, 6, "Ray-tracing...");
-TextSpriteSettings percentageProgressSpriteSettings(4, 8, 6, "100.0%");
-
+TextSpriteSettings rayTracingSpriteSettings(3, 8, 6, "Ray-tracing...");
 uint32_t lastMillis = 0;
 uint32_t numDots = 0;
+
+TextSpriteSettings percentageProgressSpriteSettings(3, 8, 6, "100.0%");
+
+const int32_t progressBarWidth = 500;
+const int32_t progressBarHeight = 10;
+const int32_t progressBarXPosition = 18;
+const int32_t progressBarYPosition = 222;
+const int32_t progressBarFillableWidth = progressBarWidth - 2;
+const int32_t progressBarFillableHeight = progressBarHeight - 2;
+int32_t prevProgressWidth = 0;
+
+bool doOnce = true;
 
 void setup()
 {
@@ -379,7 +380,7 @@ void setup()
 
     rayTracingSprite.createSprite(rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight);
     rayTracingSprite.setSwapBytes(1);
-    rayTracingSprite.fillSprite(TFT_RED);
+    rayTracingSprite.fillSprite(TFT_BLACK);
     rayTracingSprite.setTextColor(TFT_WHITE);
     rayTracingSprite.setTextSize(rayTracingSpriteSettings.textSize);
     rayTracingSprite.setTextFont(1);
@@ -389,7 +390,7 @@ void setup()
 
     percentageProgressSprite.createSprite(percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight);
     percentageProgressSprite.setSwapBytes(1);
-    percentageProgressSprite.fillSprite(TFT_RED);
+    percentageProgressSprite.fillSprite(TFT_BLACK);
     percentageProgressSprite.setTextColor(TFT_WHITE);
     percentageProgressSprite.setTextSize(percentageProgressSpriteSettings.textSize);
     percentageProgressSprite.setTextFont(1);
@@ -427,7 +428,7 @@ void updateRayTracingSprite() {
     if (millis() > lastMillis + 1000) {
         numDots += 1;
         numDots %= 4;
-        rayTracingSprite.fillSprite(TFT_RED);
+        rayTracingSprite.fillSprite(TFT_BLACK);
         std::string rayTracingString = "Ray-tracing";
         switch(numDots) {
             case 0:
@@ -451,7 +452,7 @@ void updateRayTracingSprite() {
 }
 
 void updatePercentageProgressSprite(float progress) {
-    percentageProgressSprite.fillSprite(TFT_RED);
+    percentageProgressSprite.fillSprite(TFT_BLACK);
     std::stringstream stream;
     stream << std::fixed << std::setprecision(1) << (progress * 100.0f);
     std::string numberAsString = stream.str();
