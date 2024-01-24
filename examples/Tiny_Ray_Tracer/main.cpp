@@ -354,12 +354,12 @@ uint32_t numDots = 0;
 
 TextSpriteSettings percentageProgressSpriteSettings(3, 8, 6, "100.0%");
 
-const int32_t progressBarWidth = 500;
+const int32_t progressBarWidth = 536;
 const int32_t progressBarHeight = 10;
-const int32_t progressBarXPosition = 18;
-const int32_t progressBarYPosition = 222;
-const int32_t progressBarFillableWidth = progressBarWidth - 2;
-const int32_t progressBarFillableHeight = progressBarHeight - 2;
+const int32_t progressBarXPosition = 0;
+const int32_t progressBarYPosition = 240 - progressBarHeight;
+const int32_t progressBarFillableWidth = progressBarWidth;
+const int32_t progressBarFillableHeight = progressBarHeight;
 int32_t prevProgressWidth = 0;
 
 bool doOnce = true;
@@ -401,7 +401,6 @@ void setup()
     progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
     progressBarSprite.setSwapBytes(1);
     progressBarSprite.fillSprite(TFT_BLACK);
-    progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
 
     fileParser.readFile(sceneDesc, scene);
 
