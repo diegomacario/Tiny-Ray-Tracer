@@ -337,12 +337,26 @@ const int32_t progressBarFillableWidth = progressBarWidth - 2;
 const int32_t progressBarFillableHeight = progressBarHeight - 2;
 int32_t prevProgressWidth = 0;
 bool doOnce = true;
-int32_t textSize = 4;
-int32_t fontHeight = 8;
-int32_t fontWidth = 6;
-int32_t numCharacters = 6;
-int32_t percentageProgressSpriteWidth = fontWidth * textSize * numCharacters;
-int32_t percentageProgressSpriteHeight = fontHeight * textSize;
+
+struct TextSpriteSettings {
+    TextSpriteSettings(int32_t textSize, int32_t fontHeight, int32_t fontWidth, std::string longestPossibleString)
+        : textSize(textSize)
+        , fontHeight(fontHeight)
+        , fontWidth(fontWidth)
+        , numCharacters(longestPossibleString.length())
+        , spriteWidth(fontWidth * textSize * numCharacters)
+        , spriteHeight(fontHeight * textSize)
+    { }
+
+    int32_t textSize;
+    int32_t fontHeight;
+    int32_t fontWidth;
+    int32_t numCharacters;
+    int32_t spriteWidth;
+    int32_t spriteHeight;
+};
+
+TextSpriteSettings percentageProgressSpriteSettings(4, 8, 6, "100.0%");
 
 void setup()
 {
@@ -356,7 +370,7 @@ void setup()
 
     //spr.createSprite(WIDTH, HEIGHT);
     //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
-    percentageProgressSprite.createSprite(percentageProgressSpriteWidth, percentageProgressSpriteHeight);
+    percentageProgressSprite.createSprite(percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight);
 
     //spr.setSwapBytes(1);
     //progressBarSprite.setSwapBytes(1);
@@ -369,11 +383,11 @@ void setup()
     //progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
 
     percentageProgressSprite.setTextColor(TFT_WHITE);
-    percentageProgressSprite.setTextSize(textSize);
+    percentageProgressSprite.setTextSize(percentageProgressSpriteSettings.textSize);
     percentageProgressSprite.setTextFont(1);
-    percentageProgressSprite.drawString("0.0%", percentageProgressSpriteWidth, 0);
+    percentageProgressSprite.drawString("0.0%", percentageProgressSpriteSettings.spriteWidth, 0);
     percentageProgressSprite.setTextDatum(TR_DATUM);
-    amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -439,8 +453,8 @@ void loop()
     stream << std::fixed << std::setprecision(1) << testCounter;
     std::string numberAsString = stream.str();
     numberAsString += "%";
-    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteWidth, 0);
+    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteSettings.spriteWidth, 0);
 
-    amoled.pushColors(WIDTH - percentageProgressSpriteWidth, 0, percentageProgressSpriteWidth, percentageProgressSpriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
     testCounter += 0.1f;
 }
