@@ -12,10 +12,10 @@
 #include "SceneDescription.h"
 
 TFT_eSPI tft = TFT_eSPI();
-//TFT_eSprite spr = TFT_eSprite(&tft);
-//TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
+TFT_eSprite spr = TFT_eSprite(&tft);
 TFT_eSprite percentageProgressSprite = TFT_eSprite(&tft);
 TFT_eSprite rayTracingSprite = TFT_eSprite(&tft);
+TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
 LilyGo_Class amoled;
 
 #define WIDTH  amoled.height()
@@ -373,14 +373,9 @@ void setup()
         }
     }
 
-    //spr.createSprite(WIDTH, HEIGHT);
-    //spr.setSwapBytes(1);
-    //spr.fillSprite(TFT_BLACK);
-
-    //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
-    //progressBarSprite.setSwapBytes(1);
-    //progressBarSprite.fillSprite(TFT_BLACK);
-    //progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
+    spr.createSprite(WIDTH, HEIGHT);
+    spr.setSwapBytes(1);
+    spr.fillSprite(TFT_BLACK);
 
     rayTracingSprite.createSprite(rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight);
     rayTracingSprite.setSwapBytes(1);
@@ -401,6 +396,11 @@ void setup()
     percentageProgressSprite.drawString("0.0%", percentageProgressSpriteSettings.spriteWidth, 0);
     percentageProgressSprite.setTextDatum(TR_DATUM);
     amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+
+    progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
+    progressBarSprite.setSwapBytes(1);
+    progressBarSprite.fillSprite(TFT_BLACK);
+    progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
 
     fileParser.readFile(sceneDesc, scene);
 
@@ -423,56 +423,7 @@ uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
 }
 
-float testCounter = 0.0f;
-
-void loop()
-{
-    if (sampleGenerator.sampleIsAvailable())
-    {
-        sampleGenerator.generateSample(sample);
-        rayGenerator.generateRay(sample, ray);
-
-        // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
-        // If not, the current pixel remains black
-        if (scene->findNearestIntersection(ray, &intersection))
-        {
-            Colour pixelColour = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
-
-            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColour.r, 255.0f));
-            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColour.g, 255.0f));
-            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
-            uint32_t colour = rgb888ToRgb565(r, g, b);
-
-            //spr.drawPixel(sample.x, sample.y, colour);
-            //uint16_t* spritePtr = (uint16_t*)spr.getPointer();
-            //uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
-            //amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
-            //amoled.pushColors(pixelPtr, 1);
-        }
-
-        float progress = sampleGenerator.getProgress();
-        int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
-        if (progressWidth > prevProgressWidth) {
-            //progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
-            prevProgressWidth = progressWidth;
-        }
-        //amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
-    }
-    else if (doOnce) {
-        //amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
-        doOnce = false;
-    }
-
-    percentageProgressSprite.fillSprite(TFT_RED);
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(1) << testCounter;
-    std::string numberAsString = stream.str();
-    numberAsString += "%";
-    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteSettings.spriteWidth, 0);
-
-    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
-    testCounter += 0.1f;
-
+void updateRayTracingSprite() {
     if (millis() > lastMillis + 1000) {
         numDots += 1;
         numDots %= 4;
@@ -496,5 +447,62 @@ void loop()
         rayTracingSprite.drawString(rayTracingString.c_str(), 0, 0);
         amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
         lastMillis = millis();
+    }
+}
+
+void updatePercentageProgressSprite(float progress) {
+    percentageProgressSprite.fillSprite(TFT_RED);
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(1) << (progress * 100.0f);
+    std::string numberAsString = stream.str();
+    numberAsString += "%";
+    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteSettings.spriteWidth, 0);
+
+    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+}
+
+void updateProgressBar(float progress) {
+    int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
+    if (progressWidth > prevProgressWidth) {
+        progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
+        prevProgressWidth = progressWidth;
+    }
+    amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
+}
+
+void loop()
+{
+    if (sampleGenerator.sampleIsAvailable())
+    {
+        sampleGenerator.generateSample(sample);
+        rayGenerator.generateRay(sample, ray);
+
+        // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
+        // If not, the current pixel remains black
+        if (scene->findNearestIntersection(ray, &intersection))
+        {
+            Colour pixelColour = scene->calculateLightingAtIntersection(sceneDesc->getEye(), &intersection);
+
+            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColour.r, 255.0f));
+            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColour.g, 255.0f));
+            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
+            uint32_t colour = rgb888ToRgb565(r, g, b);
+
+            spr.drawPixel(sample.x, sample.y, colour);
+            uint16_t* spritePtr = (uint16_t*)spr.getPointer();
+            uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
+            amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
+            amoled.pushColors(pixelPtr, 1);
+        }
+
+        float progress = sampleGenerator.getProgress();
+
+        updateRayTracingSprite();
+        updatePercentageProgressSprite(progress);
+        updateProgressBar(progress);
+    }
+    else if (doOnce) {
+        amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+        doOnce = false;
     }
 }
