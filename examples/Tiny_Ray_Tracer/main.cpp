@@ -350,7 +350,7 @@ struct TextSpriteSettings {
 
 TextSpriteSettings rayTracingSpriteSettings(3, 8, 6, "Ray-tracing...");
 uint32_t numDots = 0;
-uint32_t lastTimeRayTracingSpriteWasUpdated = 0;
+unsigned long lastTimeRayTracingSpriteWasUpdated = 0;
 
 TextSpriteSettings percentageProgressSpriteSettings(3, 8, 6, "100.0%");
 
@@ -502,6 +502,13 @@ void loop()
         updateProgressBar(progress);
     }
     else if (doOnce) {
+        rayTracingSprite.fillSprite(TFT_BLACK);
+        std::string doneString = "Done!";
+        rayTracingSprite.drawString(doneString.c_str(), 0, 0);
+        amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
+
+        sleep(2);
+
         amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
         doOnce = false;
     }
