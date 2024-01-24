@@ -349,8 +349,8 @@ struct TextSpriteSettings {
 };
 
 TextSpriteSettings rayTracingSpriteSettings(3, 8, 6, "Ray-tracing...");
-uint32_t lastMillis = 0;
 uint32_t numDots = 0;
+uint32_t lastTimeRayTracingSpriteWasUpdated = 0;
 
 TextSpriteSettings percentageProgressSpriteSettings(3, 8, 6, "100.0%");
 
@@ -416,7 +416,7 @@ void setup()
     ray.origin = sceneDesc->getEye();
     ray.direction = Vector(0, 0, 0);
 
-    lastMillis = millis();
+    lastTimeRayTracingSpriteWasUpdated = millis();
 }
 
 uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
@@ -424,7 +424,7 @@ uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void updateRayTracingSprite() {
-    if (millis() > lastMillis + 1000) {
+    if (millis() > lastTimeRayTracingSpriteWasUpdated + 1000) {
         numDots += 1;
         numDots %= 4;
         rayTracingSprite.fillSprite(TFT_BLACK);
@@ -446,7 +446,7 @@ void updateRayTracingSprite() {
         }
         rayTracingSprite.drawString(rayTracingString.c_str(), 0, 0);
         amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
-        lastMillis = millis();
+        lastTimeRayTracingSpriteWasUpdated = millis();
     }
 }
 
