@@ -374,14 +374,12 @@ void setup()
     }
 
     //spr.createSprite(WIDTH, HEIGHT);
-    //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
-
     //spr.setSwapBytes(1);
-    //progressBarSprite.setSwapBytes(1);
-
     //spr.fillSprite(TFT_BLACK);
-    //progressBarSprite.fillSprite(TFT_BLACK);
 
+    //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
+    //progressBarSprite.setSwapBytes(1);
+    //progressBarSprite.fillSprite(TFT_BLACK);
     //progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
 
     rayTracingSprite.createSprite(rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight);
