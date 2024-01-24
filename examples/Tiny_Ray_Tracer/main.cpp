@@ -15,6 +15,7 @@ TFT_eSPI tft = TFT_eSPI();
 //TFT_eSprite spr = TFT_eSprite(&tft);
 //TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
 TFT_eSprite percentageProgressSprite = TFT_eSprite(&tft);
+TFT_eSprite rayTracingSprite = TFT_eSprite(&tft);
 LilyGo_Class amoled;
 
 #define WIDTH  amoled.height()
@@ -356,7 +357,11 @@ struct TextSpriteSettings {
     int32_t spriteHeight;
 };
 
+TextSpriteSettings rayTracingSpriteSettings(4, 8, 6, "Ray-tracing...");
 TextSpriteSettings percentageProgressSpriteSettings(4, 8, 6, "100.0%");
+
+uint32_t lastMillis = 0;
+uint32_t numDots = 0;
 
 void setup()
 {
@@ -370,18 +375,28 @@ void setup()
 
     //spr.createSprite(WIDTH, HEIGHT);
     //progressBarSprite.createSprite(progressBarWidth, progressBarHeight);
-    percentageProgressSprite.createSprite(percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight);
 
     //spr.setSwapBytes(1);
     //progressBarSprite.setSwapBytes(1);
-    percentageProgressSprite.setSwapBytes(1);
 
     //spr.fillSprite(TFT_BLACK);
     //progressBarSprite.fillSprite(TFT_BLACK);
-    percentageProgressSprite.fillSprite(TFT_RED);
 
     //progressBarSprite.drawRect(0, 0, progressBarWidth, progressBarHeight, TFT_WHITE);
 
+    rayTracingSprite.createSprite(rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight);
+    rayTracingSprite.setSwapBytes(1);
+    rayTracingSprite.fillSprite(TFT_RED);
+    rayTracingSprite.setTextColor(TFT_WHITE);
+    rayTracingSprite.setTextSize(rayTracingSpriteSettings.textSize);
+    rayTracingSprite.setTextFont(1);
+    rayTracingSprite.drawString("Ray-tracing", 0, 0);
+    rayTracingSprite.setTextDatum(TL_DATUM);
+    amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
+
+    percentageProgressSprite.createSprite(percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight);
+    percentageProgressSprite.setSwapBytes(1);
+    percentageProgressSprite.fillSprite(TFT_RED);
     percentageProgressSprite.setTextColor(TFT_WHITE);
     percentageProgressSprite.setTextSize(percentageProgressSpriteSettings.textSize);
     percentageProgressSprite.setTextFont(1);
@@ -402,6 +417,8 @@ void setup()
 
     ray.origin = sceneDesc->getEye();
     ray.direction = Vector(0, 0, 0);
+
+    lastMillis = millis();
 }
 
 uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
@@ -457,4 +474,29 @@ void loop()
 
     amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
     testCounter += 0.1f;
+
+    if (millis() > lastMillis + 1000) {
+        numDots += 1;
+        numDots %= 4;
+        rayTracingSprite.fillSprite(TFT_RED);
+        std::string rayTracingString = "Ray-tracing";
+        switch(numDots) {
+            case 0:
+                break;
+            case 1:
+                rayTracingString += ".";
+                break;
+            case 2:
+                rayTracingString += "..";
+                break;
+            case 3:
+                rayTracingString += "...";
+                break;
+            default:
+                break;
+        }
+        rayTracingSprite.drawString(rayTracingString.c_str(), 0, 0);
+        amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
+        lastMillis = millis();
+    }
 }
