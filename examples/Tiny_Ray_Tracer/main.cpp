@@ -22,7 +22,7 @@ LilyGo_Class amoled;
 #define WIDTH  amoled.height()
 #define HEIGHT amoled.width()
 
-FileParser fileParser(castleSceneDescription);
+FileParser fileParser(planetSceneDescription);
 std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
 RandomSampleGenerator sampleGenerator;
