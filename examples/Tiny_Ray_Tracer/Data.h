@@ -12,6 +12,10 @@ Description:
    - rupeeSceneDescription
    - castleSceneDescription
    - planetSceneDescription
+   - iceCreamSceneDescription
+   - pyramidSceneDescription
+   - reflectiveSpheresSceneDescription
+   - cakeSceneDescription
 */
 
 const std::string swordSceneDescription = R"(
