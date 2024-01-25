@@ -65,6 +65,57 @@ int32_t prevProgressWidth = 0;
 
 bool doOnce = true;
 
+uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
+}
+
+void updateRayTracingSprite() {
+    if (millis() > lastTimeRayTracingSpriteWasUpdated + 1000) {
+        numDots += 1;
+        numDots %= 4;
+        rayTracingSprite.fillSprite(TFT_BLACK);
+        std::string rayTracingString = "Ray-tracing";
+        switch(numDots) {
+            case 0:
+                break;
+            case 1:
+                rayTracingString += ".";
+                break;
+            case 2:
+                rayTracingString += "..";
+                break;
+            case 3:
+                rayTracingString += "...";
+                break;
+            default:
+                break;
+        }
+        rayTracingSprite.drawString(rayTracingString.c_str(), 0, 0);
+        amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
+        lastTimeRayTracingSpriteWasUpdated = millis();
+    }
+}
+
+void updatePercentageProgressSprite(float progress) {
+    percentageProgressSprite.fillSprite(TFT_BLACK);
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(1) << (progress * 100.0f);
+    std::string numberAsString = stream.str();
+    numberAsString += "%";
+    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteSettings.spriteWidth, 0);
+
+    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
+}
+
+void updateProgressBar(float progress) {
+    int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
+    if (progressWidth > prevProgressWidth) {
+        progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
+        prevProgressWidth = progressWidth;
+    }
+    amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -118,57 +169,6 @@ void setup()
     ray.direction = Vector(0, 0, 0);
 
     lastTimeRayTracingSpriteWasUpdated = millis();
-}
-
-uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
-    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-}
-
-void updateRayTracingSprite() {
-    if (millis() > lastTimeRayTracingSpriteWasUpdated + 1000) {
-        numDots += 1;
-        numDots %= 4;
-        rayTracingSprite.fillSprite(TFT_BLACK);
-        std::string rayTracingString = "Ray-tracing";
-        switch(numDots) {
-            case 0:
-                break;
-            case 1:
-                rayTracingString += ".";
-                break;
-            case 2:
-                rayTracingString += "..";
-                break;
-            case 3:
-                rayTracingString += "...";
-                break;
-            default:
-                break;
-        }
-        rayTracingSprite.drawString(rayTracingString.c_str(), 0, 0);
-        amoled.pushColors(0, 0, rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight, (uint16_t *)rayTracingSprite.getPointer());
-        lastTimeRayTracingSpriteWasUpdated = millis();
-    }
-}
-
-void updatePercentageProgressSprite(float progress) {
-    percentageProgressSprite.fillSprite(TFT_BLACK);
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(1) << (progress * 100.0f);
-    std::string numberAsString = stream.str();
-    numberAsString += "%";
-    percentageProgressSprite.drawString(numberAsString.c_str(), percentageProgressSpriteSettings.spriteWidth, 0);
-
-    amoled.pushColors(WIDTH - percentageProgressSpriteSettings.spriteWidth, 0, percentageProgressSpriteSettings.spriteWidth, percentageProgressSpriteSettings.spriteHeight, (uint16_t *)percentageProgressSprite.getPointer());
-}
-
-void updateProgressBar(float progress) {
-    int32_t progressWidth = static_cast<int32_t>(progress * static_cast<float>(progressBarFillableWidth));
-    if (progressWidth > prevProgressWidth) {
-        progressBarSprite.fillRect(1, 1, progressWidth, progressBarFillableHeight, TFT_GREEN);
-        prevProgressWidth = progressWidth;
-    }
-    amoled.pushColors(progressBarXPosition, progressBarYPosition, progressBarWidth, progressBarHeight, (uint16_t *)progressBarSprite.getPointer());
 }
 
 void loop()
