@@ -13,7 +13,7 @@
 #include "Data.h"
 
 TFT_eSPI tft = TFT_eSPI();
-TFT_eSprite spr = TFT_eSprite(&tft);
+TFT_eSprite imageRenderingSprite = TFT_eSprite(&tft);
 TFT_eSprite percentageProgressLabelSprite = TFT_eSprite(&tft);
 TFT_eSprite rayTracingLabelSprite = TFT_eSprite(&tft);
 TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
@@ -126,9 +126,9 @@ void setup()
         }
     }
 
-    spr.createSprite(WIDTH, HEIGHT);
-    spr.setSwapBytes(1);
-    spr.fillSprite(TFT_BLACK);
+    imageRenderingSprite.createSprite(WIDTH, HEIGHT);
+    imageRenderingSprite.setSwapBytes(1);
+    imageRenderingSprite.fillSprite(TFT_BLACK);
 
     rayTracingLabelSprite.createSprite(rayTracingSpriteSettings.spriteWidth, rayTracingSpriteSettings.spriteHeight);
     rayTracingLabelSprite.setSwapBytes(1);
@@ -189,8 +189,8 @@ void loop()
             uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
             uint32_t colour = rgb888ToRgb565(r, g, b);
 
-            spr.drawPixel(sample.x, sample.y, colour);
-            uint16_t* spritePtr = (uint16_t*)spr.getPointer();
+            imageRenderingSprite.drawPixel(sample.x, sample.y, colour);
+            uint16_t* spritePtr = (uint16_t*)imageRenderingSprite.getPointer();
             uint16_t* pixelPtr = spritePtr + (sample.y * WIDTH + sample.x);
             amoled.setAddrWindow(sample.x, sample.y, sample.x, sample.y);
             amoled.pushColors(pixelPtr, 1);
@@ -210,7 +210,7 @@ void loop()
 
         sleep(2);
 
-        amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)spr.getPointer());
+        amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)imageRenderingSprite.getPointer());
         doOnce = false;
     }
 }
