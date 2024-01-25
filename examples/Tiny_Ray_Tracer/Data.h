@@ -3,6 +3,17 @@
 
 #include <string>
 
+/*
+Description:
+
+   This file contains the following scene descriptions:
+
+   - swordSceneDescription
+   - rupeeSceneDescription
+   - castleSceneDescription
+   - planetSceneDescription
+*/
+
 const std::string swordSceneDescription = R"(
 size 536 240
 output sword.png
@@ -1882,6 +1893,74 @@ sphere 0.415 -0.15 0 0.004
 sphere 0.25 0.075 0 0.004
 sphere -0.25 -0.075 0 0.004
 )";
+
+const std::string iceCreamSceneDescription = R"(
+size 536 240
+output ice_cream_sunrise_hexagon.png
+
+# --- --- --- --- -- CAMERA -- --- --- --- ---
+
+#camera 1.5 3.5 1.5 -0.5 0 -0.5 0 1 0 45
+camera 1.7 3.7 1.7 -0.5 0 -0.5 0 1 0 45
+
+# --- --- --- --- -- LIGHTS -- --- --- --- ---
+
+attenuation 0 1 0
+point 0.4 1 -1.6 1 1 1
+
+# --- --- --- --- - GEOMETRY - --- --- --- ---
+
+maxverts 7
+
+# Scoops of ice cream
+# --- --- --- --- --- --- --- --- ---
+
+# Non-reflective material
+diffuse 0 0.75 0
+
+# Base (blue)
+ambient 0.122 0.541 0.439
+sphere -0.6 0.375 -0.6 0.375
+
+# Middle (green)
+ambient 0.745 0.859 0.224
+sphere -0.6 1.05 -0.6 0.3
+
+# Top (yellow)
+ambient 0.9 0.9 0.102
+sphere -0.6 1.575 -0.6 0.225
+
+# Desert floor
+# --- --- --- --- --- --- --- --- ---
+
+# Reflective material (orange)
+ambient 0.992 0.455 0
+specular 0 0.25 0
+shininess 100
+
+vertex 1.299 0 0.75
+vertex 1.299 0 -0.75
+vertex 0 0 0
+vertex 0 0 -1.5
+vertex -1.299 0 -0.75
+vertex -1.299 0 0.75
+vertex 0 0 1.5
+
+translate -0.6 0 -0.6
+rotate 0 1 0 -15
+scale 1.2 0 1.2
+
+tri 0 1 2
+tri 1 3 2
+tri 3 4 2
+tri 4 5 2
+tri 5 6 2
+tri 6 0 2
+)";
+
+// const std::string xSceneDescription = R"(
+
+// )";
 
 #endif
 
