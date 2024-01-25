@@ -2035,6 +2035,43 @@ tri 4 5 6
 popTransform
 )";
 
+const std::string reflectiveSpheresSceneDescription = R"(
+size 536 240
+output four_spheres.png
+
+# --- --- --- --- -- CAMERA -- --- --- --- ---
+
+camera 0 0 -2 0 0.75 -2 0 0 1 45
+
+# --- --- --- --- -- LIGHTS -- --- --- --- ---
+
+attenuation 0 1 0
+point 0 0 0 1 1 1
+
+# --- --- --- --- - GEOMETRY - --- --- --- ---
+
+diffuse 0 0.5 0 
+specular 0.75 0.75 0.75 
+shininess 100000
+maxdepth 5
+
+# Green
+ambient 0.2 0.4 0.1
+sphere -0.75 0 -2 0.5
+
+# Yellow
+ambient 0.5 0.5 0
+sphere 0.75 0 -2 0.5
+
+# Red
+ambient 0.75 0 0
+sphere 0 -0.75 -2 0.5
+
+# Blue
+ambient 0 0.262 0.344
+sphere 0 0.75 -2 0.5
+)";
+
 // const std::string xSceneDescription = R"(
 
 // )";
