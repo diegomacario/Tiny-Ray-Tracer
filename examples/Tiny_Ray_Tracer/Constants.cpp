@@ -1,3 +1,5 @@
+#include "Constants.h"
+
 // To use the constants in this file, include Constants.h
 
 namespace Constants
