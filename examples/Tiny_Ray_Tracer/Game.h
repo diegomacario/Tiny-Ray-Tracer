@@ -17,8 +17,8 @@ public:
    Game(Game&&) = delete;
    Game& operator=(Game&&) = delete;
 
-   bool  initialize(const std::string& title);
-   void  executeGameLoop();
+   bool  initialize();
+   void  update();
 
 private:
 

@@ -10,7 +10,7 @@ Game::Game()
 
 }
 
-bool Game::initialize(const std::string& title)
+bool Game::initialize()
 {
    // Create the FSM
    mFSM = std::make_shared<FiniteStateMachine>();
@@ -28,10 +28,7 @@ bool Game::initialize(const std::string& title)
    return true;
 }
 
-void Game::executeGameLoop()
+void Game::update()
 {
-   while (true)
-   {
-      mFSM->updateCurrentState();
-   }
+   mFSM->updateCurrentState();
 }

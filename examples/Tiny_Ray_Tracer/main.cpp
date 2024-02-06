@@ -11,6 +11,7 @@
 #include "RayGenerator.h"
 #include "SceneDescription.h"
 #include "Data.h"
+#include "Game.h"
 
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite imageRenderingSprite = TFT_eSprite(&tft);
@@ -64,6 +65,8 @@ const int32_t progressBarFillableHeight = progressBarHeight;
 int32_t prevProgressWidth = 0;
 
 bool doOnce = true;
+
+Game game;
 
 uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
@@ -169,6 +172,8 @@ void setup()
     ray.direction = Vector(0, 0, 0);
 
     lastTimeRayTracingSpriteWasUpdated = millis();
+
+    game.initialize();
 }
 
 void loop()
@@ -213,4 +218,6 @@ void loop()
         amoled.pushColors(0, 0, WIDTH, HEIGHT, (uint16_t *)imageRenderingSprite.getPointer());
         doOnce = false;
     }
+
+    game.update();
 }
