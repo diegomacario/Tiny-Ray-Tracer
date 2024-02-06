@@ -17,7 +17,7 @@ public:
    Game(Game&&) = delete;
    Game& operator=(Game&&) = delete;
 
-   bool  initialize(TFT_eSPI& tft, LilyGo_Class* amoled, uint16_t screenWidth, uint16_t screenHeight);
+   void  initialize(LilyGo_Class* amoled, TFT_eSPI& tft, uint16_t screenWidth, uint16_t screenHeight);
    void  update();
 
 private:

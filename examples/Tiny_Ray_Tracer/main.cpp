@@ -1,18 +1,11 @@
 #include <LilyGo_AMOLED.h>
 #include <TFT_eSPI.h>
 
-#include <memory>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-
 #include "Game.h"
 
-TFT_eSPI tft = TFT_eSPI();
 LilyGo_Class amoled;
 
-#define WIDTH  amoled.height()
-#define HEIGHT amoled.width()
+TFT_eSPI tft = TFT_eSPI();
 
 Game game;
 
@@ -26,7 +19,7 @@ void setup()
         }
     }
 
-    game.initialize(tft, &amoled, WIDTH, HEIGHT);
+    game.initialize(&amoled, tft, amoled.height(), amoled.width());
 }
 
 void loop()

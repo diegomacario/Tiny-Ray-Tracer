@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "Game.h"
 #include "PlayState.h"
 
@@ -10,7 +8,7 @@ Game::Game()
 
 }
 
-bool Game::initialize(TFT_eSPI& tft, LilyGo_Class* amoled, uint16_t screenWidth, uint16_t screenHeight)
+void Game::initialize(LilyGo_Class* amoled, TFT_eSPI& tft, uint16_t screenWidth, uint16_t screenHeight)
 {
    // Create the FSM
    mFSM = std::make_shared<FiniteStateMachine>();
@@ -18,14 +16,12 @@ bool Game::initialize(TFT_eSPI& tft, LilyGo_Class* amoled, uint16_t screenWidth,
    // Initialize the states
    std::unordered_map<std::string, std::shared_ptr<State>> mStates;
 
-   mPlayState = std::make_shared<PlayState>(mFSM, tft, amoled, screenWidth, screenHeight);
+   mPlayState = std::make_shared<PlayState>(mFSM, amoled, tft, screenWidth, screenHeight);
 
    mStates["play"] = mPlayState;
 
    // Initialize the FSM
    mFSM->initialize(std::move(mStates), "play");
-
-   return true;
 }
 
 void Game::update()

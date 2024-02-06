@@ -34,10 +34,10 @@ class PlayState : public State
 public:
 
    PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-            TFT_eSPI& tft,
-            LilyGo_Class* amoled,
-            uint16_t screenWidth,
-            uint16_t screenHeight);
+             LilyGo_Class* amoled,
+             TFT_eSPI& tft,
+             uint16_t screenWidth,
+             uint16_t screenHeight);
    ~PlayState() = default;
 
    PlayState(const PlayState&) = delete;
@@ -58,40 +58,40 @@ private:
 
    std::shared_ptr<FiniteStateMachine> mFSM;
 
-   LilyGo_Class* amoled;
+   LilyGo_Class*                       amoled;
 
-   const uint16_t mScreenWidth;
-   const uint16_t mScreenHeight;
+   const uint16_t                      mScreenWidth;
+   const uint16_t                      mScreenHeight;
 
-   TFT_eSprite imageRenderingSprite;
-   TFT_eSprite rayTracingLabelSprite;
-   TFT_eSprite percentageProgressLabelSprite;
-   TFT_eSprite progressBarSprite;
+   TFT_eSprite                         mImageRenderingSprite;
+   TFT_eSprite                         mRayTracingLabelSprite;
+   TFT_eSprite                         mPercentageProgressLabelSprite;
+   TFT_eSprite                         mProgressBarSprite;
 
-   FileParser fileParser;
-   std::unique_ptr<SceneDescription> sceneDesc;
-   std::unique_ptr<Scene> scene;
-   RandomSampleGenerator sampleGenerator;
-   RayGenerator rayGenerator;
-   Sample sample;
-   Ray ray;
-   Intersection intersection;
+   FileParser                          mFileParser;
+   std::unique_ptr<SceneDescription>   mSceneDesc;
+   std::unique_ptr<Scene>              mScene;
+   RandomSampleGenerator               mSampleGenerator;
+   RayGenerator                        mRayGenerator;
+   Sample                              mSample;
+   Ray                                 mRay;
+   Intersection                        mIntersection;
 
-   TextSpriteSettings rayTracingSpriteSettings;
-   uint32_t numDots;
-   unsigned long lastTimeRayTracingSpriteWasUpdated;
+   TextSpriteSettings                  mRayTracingSpriteSettings;
+   uint32_t                            mNumDots;
+   unsigned long                       mLastTimeRayTracingSpriteWasUpdated;
 
-   TextSpriteSettings percentageProgressSpriteSettings;
+   TextSpriteSettings                  mPercentageProgressSpriteSettings;
 
-   const int32_t progressBarWidth;
-   const int32_t progressBarHeight;
-   const int32_t progressBarXPosition;
-   const int32_t progressBarYPosition;
-   const int32_t progressBarFillableWidth;
-   const int32_t progressBarFillableHeight;
-   int32_t prevProgressWidth;
+   const int32_t                       mProgressBarWidth;
+   const int32_t                       mProgressBarHeight;
+   const int32_t                       mProgressBarXPosition;
+   const int32_t                       mProgressBarYPosition;
+   const int32_t                       mProgressBarFillableWidth;
+   const int32_t                       mProgressBarFillableHeight;
+   int32_t                             mPrevProgressWidth;
 
-   bool doOnce;
+   bool                                mDoOnce;
 };
 
 #endif
