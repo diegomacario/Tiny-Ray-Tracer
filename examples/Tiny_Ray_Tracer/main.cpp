@@ -14,15 +14,15 @@
 
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite imageRenderingSprite = TFT_eSprite(&tft);
-TFT_eSprite percentageProgressLabelSprite = TFT_eSprite(&tft);
 TFT_eSprite rayTracingLabelSprite = TFT_eSprite(&tft);
+TFT_eSprite percentageProgressLabelSprite = TFT_eSprite(&tft);
 TFT_eSprite progressBarSprite = TFT_eSprite(&tft);
 LilyGo_Class amoled;
 
 #define WIDTH  amoled.height()
 #define HEIGHT amoled.width()
 
-FileParser fileParser(swordSceneDescription);
+FileParser fileParser(planetSceneDescription);
 std::unique_ptr<SceneDescription> sceneDesc = nullptr;
 std::unique_ptr<Scene> scene = nullptr;
 RandomSampleGenerator sampleGenerator;
