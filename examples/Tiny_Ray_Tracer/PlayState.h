@@ -18,9 +18,7 @@ public:
    PlayState& operator=(PlayState&&) = delete;
 
    void enter() override;
-   void processInput() override;
-   void update(float deltaTime) override;
-   void render() override;
+   void update() override;
    void exit() override;
 
 private:

@@ -11,17 +11,7 @@ void PlayState::enter()
 
 }
 
-void PlayState::processInput()
-{
-
-}
-
-void PlayState::update(float deltaTime)
-{
-
-}
-
-void PlayState::render()
+void PlayState::update()
 {
 
 }

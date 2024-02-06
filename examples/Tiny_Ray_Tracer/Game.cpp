@@ -32,10 +32,6 @@ void Game::executeGameLoop()
 {
    while (true)
    {
-      mFSM->processInputInCurrentState();
-
-      mFSM->updateCurrentState(0.0f);
-
-      mFSM->renderCurrentState();
+      mFSM->updateCurrentState();
    }
 }
