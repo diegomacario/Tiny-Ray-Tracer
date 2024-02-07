@@ -47,6 +47,8 @@ private:
 
    int32_t                             mCellHorizontalMargin;
    int32_t                             mCellVerticalMargin;
+   int32_t                             mCellHorizontalPadding;
+   int32_t                             mCellVerticalPadding;
 
    int32_t                             mCellWidth;
    int32_t                             mCellHeight;
