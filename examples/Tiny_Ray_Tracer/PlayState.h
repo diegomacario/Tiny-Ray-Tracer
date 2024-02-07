@@ -11,6 +11,7 @@
 #include "RayGenerator.h"
 #include "SceneDescription.h"
 
+// TODO: Figure out where to put this
 struct TextSpriteSettings {
     TextSpriteSettings(int32_t textSize, int32_t fontHeight, int32_t fontWidth, std::string longestPossibleString)
         : textSize(textSize)
