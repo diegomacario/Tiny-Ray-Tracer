@@ -34,7 +34,7 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    int32_t longestLabelWidth = fontWidth * mFontSize * longestLabelLength;
    int32_t longestLabelHeight = fontHeight * mFontSize;
 
-   while (longestLabelWidth < mCellWidth && longestLabelHeight < mCellHeight && mFontSize <= 7) {
+   while (longestLabelWidth < mCellWidth && longestLabelHeight < mCellHeight && mFontSize < 7) {
       mFontSize++;
       longestLabelWidth = fontWidth * mFontSize * longestLabelLength;
       longestLabelHeight = fontHeight * mFontSize;
