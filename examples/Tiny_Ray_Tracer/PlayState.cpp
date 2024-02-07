@@ -133,7 +133,10 @@ void PlayState::update()
 
 void PlayState::exit()
 {
-
+   mImageRenderingSprite.deleteSprite();
+   mRayTracingLabelSprite.deleteSprite();
+   mPercentageProgressLabelSprite.deleteSprite();
+   mProgressBarSprite.deleteSprite();
 }
 
 void PlayState::updateRayTracingSprite() {
