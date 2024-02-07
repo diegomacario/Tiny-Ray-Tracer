@@ -53,6 +53,8 @@ private:
    int32_t                             mCellRadius;
 
    std::vector<Cell>                   mCells;
+
+   int32_t                             mFontSize;
 };
 
 #endif
