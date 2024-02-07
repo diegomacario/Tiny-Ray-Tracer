@@ -12,7 +12,7 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
    , mSprite(&tft)
-   , mNumRows(3)
+   , mNumRows(4)
    , mNumColumns(2)
    , mHorizontalPadding(10)
    , mVerticalPadding(10)
@@ -20,11 +20,15 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellHeight((mScreenHeight - (mVerticalPadding * (mNumRows + 1))) * (1.0f / mNumRows))
    , mCellRadius(25)
 {
+   std::vector<std::string> cellLabels = {"Sword", "Rupee", "Castle", "Planet", "Ice cream", "Pyramid", "Spheres", "Cake"};
+
+   int32_t cellIndex = 0;
    for (int32_t columnIndex = 0; columnIndex < mNumColumns; ++columnIndex) {
       for (int32_t rowIndex = 0; rowIndex < mNumRows; ++rowIndex) {
          int32_t xPos = mHorizontalPadding + ((mCellWidth + mHorizontalPadding) * columnIndex);
          int32_t yPos = mVerticalPadding + ((mCellHeight + mVerticalPadding) * rowIndex);
-         mCells.push_back(Cell(xPos, yPos));
+         mCells.push_back(Cell(xPos, yPos, cellLabels[cellIndex]));
+         cellIndex += 1;
       }
    }
 }
