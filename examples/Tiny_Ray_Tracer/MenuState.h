@@ -45,8 +45,8 @@ private:
    int32_t                             mNumRows;
    int32_t                             mNumColumns;
 
-   int32_t                             mHorizontalPadding;
-   int32_t                             mVerticalPadding;
+   int32_t                             mCellHorizontalMargin;
+   int32_t                             mCellVerticalMargin;
 
    int32_t                             mCellWidth;
    int32_t                             mCellHeight;
