@@ -3,11 +3,6 @@
 #include "MenuState.h"
 #include "Data.h"
 
-// TODO: Figure out where to put this
-uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
-    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
-}
-
 MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
                      LilyGo_Class* amoled,
                      TFT_eSPI& tft,
@@ -26,12 +21,16 @@ void MenuState::enter()
 {
    mSprite.createSprite(mScreenWidth, mScreenHeight);
    mSprite.setSwapBytes(1);
-   mSprite.fillSprite(TFT_BLACK);
+   mSprite.fillSprite(TFT_RED);
 }
 
 void MenuState::update()
 {
+   amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 
+   sleep(5);
+
+   mFSM->changeState("play");
 }
 
 void MenuState::exit()

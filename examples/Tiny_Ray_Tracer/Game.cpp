@@ -1,8 +1,10 @@
 #include "Game.h"
+#include "MenuState.h"
 #include "PlayState.h"
 
 Game::Game()
-   : mPlayState()
+   : mMenuState()
+   , mPlayState()
    , mFSM()
 {
 
@@ -16,12 +18,14 @@ void Game::initialize(LilyGo_Class* amoled, TFT_eSPI& tft, uint16_t screenWidth,
    // Initialize the states
    std::unordered_map<std::string, std::shared_ptr<State>> mStates;
 
+   mMenuState = std::make_shared<MenuState>(mFSM, amoled, tft, screenWidth, screenHeight);
    mPlayState = std::make_shared<PlayState>(mFSM, amoled, tft, screenWidth, screenHeight);
 
+   mStates["menu"] = mMenuState;
    mStates["play"] = mPlayState;
 
    // Initialize the FSM
-   mFSM->initialize(std::move(mStates), "play");
+   mFSM->initialize(std::move(mStates), "menu");
 }
 
 void Game::update()

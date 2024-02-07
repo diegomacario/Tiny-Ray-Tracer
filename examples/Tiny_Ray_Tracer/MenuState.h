@@ -7,25 +7,6 @@
 #include "State.h"
 #include "FSM.h"
 
-// TODO: Figure out where to put this
-struct TextSpriteSettings {
-    TextSpriteSettings(int32_t textSize, int32_t fontHeight, int32_t fontWidth, std::string longestPossibleString)
-        : textSize(textSize)
-        , fontHeight(fontHeight)
-        , fontWidth(fontWidth)
-        , numCharacters(longestPossibleString.length())
-        , spriteWidth(fontWidth * textSize * numCharacters)
-        , spriteHeight(fontHeight * textSize)
-    { }
-
-    int32_t textSize;
-    int32_t fontHeight;
-    int32_t fontWidth;
-    int32_t numCharacters;
-    int32_t spriteWidth;
-    int32_t spriteHeight;
-};
-
 class MenuState : public State
 {
 public:

@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "MenuState.h"
 #include "PlayState.h"
 #include "FSM.h"
 
@@ -21,6 +22,8 @@ public:
    void  update();
 
 private:
+
+   std::shared_ptr<MenuState>          mMenuState;
 
    std::shared_ptr<PlayState>          mPlayState;
 
