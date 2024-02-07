@@ -1,11 +1,14 @@
 #ifndef MENU_STATE_H
 #define MENU_STATE_H
 
+#include <vector>
+
 #include <LilyGo_AMOLED.h>
 #include <TFT_eSPI.h>
 
 #include "State.h"
 #include "FSM.h"
+#include "Cell.h"
 
 class MenuState : public State
 {
@@ -30,10 +33,6 @@ public:
 
 private:
 
-   void updateRayTracingSprite();
-   void updatePercentageProgressSprite(float progress);
-   void updateProgressBar(float progress);
-
    std::shared_ptr<FiniteStateMachine> mFSM;
 
    LilyGo_Class*                       amoled;
@@ -43,12 +42,17 @@ private:
 
    TFT_eSprite                         mSprite;
 
-   float                               mHorizontalPadding;
-   float                               mVerticalPadding;
+   int32_t                             mNumRows;
+   int32_t                             mNumColumns;
 
-   float                               mCellWidth;
-   float                               mCellHeight;
+   int32_t                             mHorizontalPadding;
+   int32_t                             mVerticalPadding;
+
+   int32_t                             mCellWidth;
+   int32_t                             mCellHeight;
    int32_t                             mCellRadius;
+
+   std::vector<Cell>                   mCells;
 };
 
 #endif

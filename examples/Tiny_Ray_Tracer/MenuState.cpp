@@ -1,7 +1,6 @@
 #include <iomanip>
 
 #include "MenuState.h"
-#include "Data.h"
 
 MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
                      LilyGo_Class* amoled,
@@ -13,13 +12,21 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
    , mSprite(&tft)
-   , mHorizontalPadding(10.0f)
-   , mVerticalPadding(10.0f)
-   , mCellWidth((mScreenWidth - (mHorizontalPadding * 3.0f)) * 0.5f)
-   , mCellHeight((mScreenHeight - (mVerticalPadding * 4.0f)) * (1.0f / 3.0f))
-   , mCellRadius(20)
+   , mNumRows(3)
+   , mNumColumns(2)
+   , mHorizontalPadding(10)
+   , mVerticalPadding(10)
+   , mCellWidth((mScreenWidth - (mHorizontalPadding * (mNumColumns + 1))) * (1.0f / mNumColumns))
+   , mCellHeight((mScreenHeight - (mVerticalPadding * (mNumRows + 1))) * (1.0f / mNumRows))
+   , mCellRadius(25)
 {
-
+   for (int32_t columnIndex = 0; columnIndex < mNumColumns; ++columnIndex) {
+      for (int32_t rowIndex = 0; rowIndex < mNumRows; ++rowIndex) {
+         int32_t xPos = mHorizontalPadding + ((mCellWidth + mHorizontalPadding) * columnIndex);
+         int32_t yPos = mVerticalPadding + ((mCellHeight + mVerticalPadding) * rowIndex);
+         mCells.push_back(Cell(xPos, yPos));
+      }
+   }
 }
 
 void MenuState::enter()
@@ -28,32 +35,9 @@ void MenuState::enter()
    mSprite.setSwapBytes(1);
    mSprite.fillSprite(TFT_BLACK);
 
-   int32_t xPos = 0;
-   int32_t yPos = 0;
-
-   // Starting with the top left cell and moving down
-
-   // First column
-   xPos = mHorizontalPadding;
-   yPos = mVerticalPadding;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-
-   yPos = mVerticalPadding + mCellHeight + mVerticalPadding;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-
-   yPos = mVerticalPadding + (mCellHeight + mVerticalPadding) * 2.0f;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-
-   // Second column
-   xPos = mHorizontalPadding + mCellWidth + mHorizontalPadding;
-   yPos = mVerticalPadding;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-
-   yPos = mVerticalPadding + mCellHeight + mVerticalPadding;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-
-   yPos = mVerticalPadding + (mCellHeight + mVerticalPadding) * 2.0f;
-   mSprite.drawRoundRect(xPos, yPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
+   for (const Cell& cell: mCells) {
+      mSprite.drawRoundRect(cell.mXPos, cell.mYPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
+   }
 
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 }
