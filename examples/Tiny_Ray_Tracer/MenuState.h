@@ -42,6 +42,13 @@ private:
    const uint16_t                      mScreenHeight;
 
    TFT_eSprite                         mSprite;
+
+   float                               mHorizontalPadding;
+   float                               mVerticalPadding;
+
+   float                               mCellWidth;
+   float                               mCellHeight;
+   int32_t                             mCellRadius;
 };
 
 #endif
