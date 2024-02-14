@@ -20,7 +20,7 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellVerticalPadding(2)
    , mCellWidth((mScreenWidth - (mCellHorizontalMargin * (mNumColumns + 1))) * (1.0f / mNumColumns))
    , mCellHeight((mScreenHeight - (mCellVerticalMargin * (mNumRows + 1))) * (1.0f / mNumRows))
-   , mCellRadius(25)
+   , mCellRadius(20)
 {
    std::vector<std::string> cellLabels = {"Sword", "Rupee", "Castle", "Planet", "Ice Cream", "Pyramid", "Spheres", "Cake"};
 
@@ -31,7 +31,9 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    int32_t longestLabelLength = (*longestLabel).length();
 
    int32_t fontWidth = 6;
-   int32_t fontHeight = 8;
+   // The font has a height of 8 pixels, but the last pixel corresponds to an empty line to separate letters vertically
+   // We ignore that last empty line to center the text correctly
+   int32_t fontHeight = 8 - 1;
    mFontSize = 1;
    int32_t longestLabelWidth = fontWidth * mFontSize * longestLabelLength;
    int32_t longestLabelHeight = fontHeight * mFontSize;
