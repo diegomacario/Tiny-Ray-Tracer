@@ -58,11 +58,11 @@ private:
 
    int32_t                             mFontSize;
 
-   const int                           mButtonPin;
-   int                                 mButtonState;
-   int                                 mLastButtonState;
-   unsigned long                       mLastDebounceTime;
-   unsigned long                       mDebounceDelay;
+   const int                           mNextSceneButtonPin;
+   int                                 mNextSceneButtonState;
+   int                                 mLastNextSceneButtonState;
+   unsigned long                       mLastNextSceneButtonDebounceTime;
+   unsigned long                       mNextSceneButtonDebounceDelay;
 };
 
 #endif

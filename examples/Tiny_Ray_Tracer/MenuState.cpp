@@ -22,11 +22,11 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellWidth((mScreenWidth - (mCellHorizontalMargin * (mNumColumns + 1))) * (1.0f / mNumColumns))
    , mCellHeight((mScreenHeight - (mCellVerticalMargin * (mNumRows + 1))) * (1.0f / mNumRows))
    , mCellRadius(20)
-   , mButtonPin(1)
-   , mButtonState(LOW)
-   , mLastButtonState(LOW)
-   , mLastDebounceTime(0)
-   , mDebounceDelay(50)
+   , mNextSceneButtonPin(1)
+   , mNextSceneButtonState(LOW)
+   , mLastNextSceneButtonState(LOW)
+   , mLastNextSceneButtonDebounceTime(0)
+   , mNextSceneButtonDebounceDelay(50)
 {
    std::vector<std::string> cellLabels = {"Sword", "Rupee", "Castle", "Planet", "Ice Cream", "Pyramid", "Spheres", "Cake"};
 
@@ -95,28 +95,28 @@ void MenuState::enter()
 
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 
-   pinMode(mButtonPin, INPUT_PULLDOWN);
+   pinMode(mNextSceneButtonPin, INPUT_PULLDOWN);
 }
 
 void MenuState::update()
 {
   // read the state of the switch into a local variable:
-  int reading = digitalRead(mButtonPin);
+  int reading = digitalRead(mNextSceneButtonPin);
 
-   if (reading != mLastButtonState) {
+   if (reading != mLastNextSceneButtonState) {
       // reset the debouncing timer
-      mLastDebounceTime = millis();
+      mLastNextSceneButtonDebounceTime = millis();
    }
 
-   if ((millis() - mLastDebounceTime) > mDebounceDelay) {
+   if ((millis() - mLastNextSceneButtonDebounceTime) > mNextSceneButtonDebounceDelay) {
       // whatever the reading is at, it's been there for longer than the debounce
       // delay, so take it as the actual current state:
 
       // if the button state has changed:
-      if (reading != mButtonState) {
-         mButtonState = reading;
+      if (reading != mNextSceneButtonState) {
+         mNextSceneButtonState = reading;
 
-         if (mButtonState == HIGH) {
+         if (mNextSceneButtonState == HIGH) {
             // Do magical things here
             std::cout << "Pressed!" << '\n' ;
          }
@@ -124,7 +124,7 @@ void MenuState::update()
    }
 
    // save the reading. Next time through the loop, it'll be the lastButtonState:
-   mLastButtonState = reading;
+   mLastNextSceneButtonState = reading;
 }
 
 void MenuState::exit()
