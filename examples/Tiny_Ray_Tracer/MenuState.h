@@ -34,6 +34,7 @@ public:
 private:
 
    bool checkNextSceneButton();
+   bool checkSelectSceneButton();
 
    std::shared_ptr<FiniteStateMachine> mFSM;
 
@@ -65,6 +66,12 @@ private:
    int                                 mLastNextSceneButtonState;
    unsigned long                       mLastNextSceneButtonDebounceTime;
    unsigned long                       mNextSceneButtonDebounceDelay;
+
+   const int                           mSelectSceneButtonPin;
+   int                                 mSelectSceneButtonState;
+   int                                 mLastSelectSceneButtonState;
+   unsigned long                       mLastSelectSceneButtonDebounceTime;
+   unsigned long                       mSelectSceneButtonDebounceDelay;
 };
 
 #endif

@@ -27,6 +27,11 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mLastNextSceneButtonState(LOW)
    , mLastNextSceneButtonDebounceTime(0)
    , mNextSceneButtonDebounceDelay(50)
+   , mSelectSceneButtonPin(2)
+   , mSelectSceneButtonState(LOW)
+   , mLastSelectSceneButtonState(LOW)
+   , mLastSelectSceneButtonDebounceTime(0)
+   , mSelectSceneButtonDebounceDelay(50)
 {
    std::vector<std::string> cellLabels = {"Sword", "Rupee", "Castle", "Planet", "Ice Cream", "Pyramid", "Spheres", "Cake"};
 
@@ -96,13 +101,19 @@ void MenuState::enter()
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 
    pinMode(mNextSceneButtonPin, INPUT_PULLDOWN);
+   pinMode(mSelectSceneButtonPin, INPUT_PULLDOWN);
 }
 
 void MenuState::update()
 {
    bool nextSceneButtonIsPressed = checkNextSceneButton();
    if (nextSceneButtonIsPressed) {
-      std::cout << "Pressed!" << '\n' ;
+      std::cout << "Next Pressed!" << '\n' ;
+   }
+
+   bool selectSceneButtonIsPressed = checkSelectSceneButton();
+   if (selectSceneButtonIsPressed) {
+      std::cout << "Select Pressed!" << '\n' ;
    }
 }
 
@@ -140,4 +151,35 @@ bool MenuState::checkNextSceneButton()
    mLastNextSceneButtonState = reading;
 
    return nextSceneButtonIsPressed;
+}
+
+bool MenuState::checkSelectSceneButton()
+{
+   bool selectSceneButtonIsPressed = false;
+
+   int reading = digitalRead(mSelectSceneButtonPin);
+
+   if (reading != mLastSelectSceneButtonState) {
+      // Reset the debouncing timer
+      mLastSelectSceneButtonDebounceTime = millis();
+   }
+
+   if ((millis() - mLastSelectSceneButtonDebounceTime) > mSelectSceneButtonDebounceDelay) {
+      // Whatever the reading is at, it's been there for longer than the debounce delay,
+      // so take it as the actual current state
+
+      // If the button state has changed
+      if (reading != mSelectSceneButtonState) {
+         mSelectSceneButtonState = reading;
+
+         // If the new state of the button is HIGH
+         if (mSelectSceneButtonState == HIGH) {
+            selectSceneButtonIsPressed = true;
+         }
+      }
+   }
+
+   mLastSelectSceneButtonState = reading;
+
+   return selectSceneButtonIsPressed;
 }
