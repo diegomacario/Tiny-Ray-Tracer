@@ -22,6 +22,11 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellWidth((mScreenWidth - (mCellHorizontalMargin * (mNumColumns + 1))) * (1.0f / mNumColumns))
    , mCellHeight((mScreenHeight - (mCellVerticalMargin * (mNumRows + 1))) * (1.0f / mNumRows))
    , mCellRadius(20)
+   , mButtonPin(1)
+   , mButtonState(LOW)
+   , mLastButtonState(LOW)
+   , mLastDebounceTime(0)
+   , mDebounceDelay(50)
 {
    std::vector<std::string> cellLabels = {"Sword", "Rupee", "Castle", "Planet", "Ice Cream", "Pyramid", "Spheres", "Cake"};
 
@@ -73,15 +78,6 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    }
 }
 
-const int buttonPin = 1;
-int buttonState;
-int lastButtonState = LOW;
-
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0; // the last time the output pin was toggled
-unsigned long debounceDelay = 50;   // the debounce time; increase if the output flickers
-
 void MenuState::enter()
 {
    mSprite.createSprite(mScreenWidth, mScreenHeight);
@@ -99,28 +95,28 @@ void MenuState::enter()
 
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 
-   pinMode(buttonPin, INPUT_PULLDOWN);
+   pinMode(mButtonPin, INPUT_PULLDOWN);
 }
 
 void MenuState::update()
 {
   // read the state of the switch into a local variable:
-  int reading = digitalRead(buttonPin);
+  int reading = digitalRead(mButtonPin);
 
-   if (reading != lastButtonState) {
+   if (reading != mLastButtonState) {
       // reset the debouncing timer
-      lastDebounceTime = millis();
+      mLastDebounceTime = millis();
    }
 
-   if ((millis() - lastDebounceTime) > debounceDelay) {
+   if ((millis() - mLastDebounceTime) > mDebounceDelay) {
       // whatever the reading is at, it's been there for longer than the debounce
       // delay, so take it as the actual current state:
 
       // if the button state has changed:
-      if (reading != buttonState) {
-         buttonState = reading;
+      if (reading != mButtonState) {
+         mButtonState = reading;
 
-         if (buttonState == HIGH) {
+         if (mButtonState == HIGH) {
             // Do magical things here
             std::cout << "Pressed!" << '\n' ;
          }
@@ -128,7 +124,7 @@ void MenuState::update()
    }
 
    // save the reading. Next time through the loop, it'll be the lastButtonState:
-   lastButtonState = reading;
+   mLastButtonState = reading;
 }
 
 void MenuState::exit()

@@ -57,6 +57,12 @@ private:
    std::vector<Cell>                   mCells;
 
    int32_t                             mFontSize;
+
+   const int                           mButtonPin;
+   int                                 mButtonState;
+   int                                 mLastButtonState;
+   unsigned long                       mLastDebounceTime;
+   unsigned long                       mDebounceDelay;
 };
 
 #endif
