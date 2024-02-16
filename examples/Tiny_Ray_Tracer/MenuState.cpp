@@ -100,34 +100,44 @@ void MenuState::enter()
 
 void MenuState::update()
 {
-  // read the state of the switch into a local variable:
-  int reading = digitalRead(mNextSceneButtonPin);
-
-   if (reading != mLastNextSceneButtonState) {
-      // reset the debouncing timer
-      mLastNextSceneButtonDebounceTime = millis();
+   bool nextSceneButtonIsPressed = checkNextSceneButton();
+   if (nextSceneButtonIsPressed) {
+      std::cout << "Pressed!" << '\n' ;
    }
-
-   if ((millis() - mLastNextSceneButtonDebounceTime) > mNextSceneButtonDebounceDelay) {
-      // whatever the reading is at, it's been there for longer than the debounce
-      // delay, so take it as the actual current state:
-
-      // if the button state has changed:
-      if (reading != mNextSceneButtonState) {
-         mNextSceneButtonState = reading;
-
-         if (mNextSceneButtonState == HIGH) {
-            // Do magical things here
-            std::cout << "Pressed!" << '\n' ;
-         }
-      }
-   }
-
-   // save the reading. Next time through the loop, it'll be the lastButtonState:
-   mLastNextSceneButtonState = reading;
 }
 
 void MenuState::exit()
 {
    mSprite.deleteSprite();
+}
+
+bool MenuState::checkNextSceneButton()
+{
+   bool nextSceneButtonIsPressed = false;
+
+   int reading = digitalRead(mNextSceneButtonPin);
+
+   if (reading != mLastNextSceneButtonState) {
+      // Reset the debouncing timer
+      mLastNextSceneButtonDebounceTime = millis();
+   }
+
+   if ((millis() - mLastNextSceneButtonDebounceTime) > mNextSceneButtonDebounceDelay) {
+      // Whatever the reading is at, it's been there for longer than the debounce delay,
+      // so take it as the actual current state
+
+      // If the button state has changed
+      if (reading != mNextSceneButtonState) {
+         mNextSceneButtonState = reading;
+
+         // If the new state of the button is HIGH
+         if (mNextSceneButtonState == HIGH) {
+            nextSceneButtonIsPressed = true;
+         }
+      }
+   }
+
+   mLastNextSceneButtonState = reading;
+
+   return nextSceneButtonIsPressed;
 }

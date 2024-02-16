@@ -33,6 +33,8 @@ public:
 
 private:
 
+   bool checkNextSceneButton();
+
    std::shared_ptr<FiniteStateMachine> mFSM;
 
    LilyGo_Class*                       amoled;
