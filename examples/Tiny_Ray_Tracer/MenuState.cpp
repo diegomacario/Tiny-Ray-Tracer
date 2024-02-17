@@ -72,12 +72,13 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
          int32_t xPos = mCellHorizontalMargin + ((mCellWidth + mCellHorizontalMargin) * columnIndex);
          int32_t yPos = mCellVerticalMargin + ((mCellHeight + mCellVerticalMargin) * rowIndex);
 
-         int32_t textXPos = xPos + mCellHorizontalPadding;
-         int32_t textYPos = yPos + mCellVerticalPadding;
+         int32_t textXPos = mCellHorizontalPadding;
+         int32_t textYPos = mCellVerticalPadding;
          int32_t gap = (maxTextHeight - longestLabelHeight) * 0.5f;
          textYPos += gap;
 
          mCells.push_back(Cell(xPos, yPos, cellLabels[cellIndex], textXPos, textYPos));
+         mCellSprites.emplace_back(&tft);
          cellIndex += 1;
       }
    }
@@ -92,10 +93,19 @@ void MenuState::enter()
    mSprite.setTextSize(mFontSize);
    mSprite.setTextFont(1);
 
-   for (const Cell& cell: mCells) {
-      //mSprite.drawRoundRect(cell.mXPos, cell.mYPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-      mSprite.drawRect(cell.mXPos, cell.mYPos, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
-      mSprite.drawString(cell.mText.c_str(), cell.mTextXPos, cell.mTextYPos);
+   for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
+      mCellSprites[cellIndex].createSprite(static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight));
+      mCellSprites[cellIndex].setSwapBytes(1);
+      mCellSprites[cellIndex].fillSprite(TFT_BLACK);
+      mCellSprites[cellIndex].setTextColor(TFT_WHITE);
+      mCellSprites[cellIndex].setTextSize(mFontSize);
+      mCellSprites[cellIndex].setTextFont(1);
+
+      //mCellSprites[cellIndex].drawRoundRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
+      mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
+      mCellSprites[cellIndex].drawString(mCells[cellIndex].mText.c_str(), mCells[cellIndex].mTextXPos, mCells[cellIndex].mTextYPos);
+
+      mCellSprites[cellIndex].pushToSprite(&mSprite, mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, TFT_BLACK);
    }
 
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
