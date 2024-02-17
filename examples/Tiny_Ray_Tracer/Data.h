@@ -8,17 +8,17 @@ Description:
 
    This file contains the following scene descriptions:
 
-   - swordSceneDescription
-   - rupeeSceneDescription
-   - castleSceneDescription
-   - planetSceneDescription
-   - iceCreamSceneDescription
-   - pyramidSceneDescription
-   - reflectiveSpheresSceneDescription
-   - cakeSceneDescription
+   - Sword
+   - Rupee
+   - Castle
+   - Planet
+   - Ice Cream
+   - Pyramid
+   - Spheres
+   - Cake
 */
 
-const std::string swordSceneDescription = R"(
+std::vector<std::string> sceneDescriptions = {R"(
 size 536 240
 output sword.png
 
@@ -316,9 +316,9 @@ tri 45 34 39
 tri 45 40 34
 
 popTransform
-)";
+)",
 
-const std::string rupeeSceneDescription = R"(
+R"(
 size 536 240 
 output rupee.png
 
@@ -426,9 +426,9 @@ tri 12 1 6
 tri 12 7 1
 
 popTransform
-)";
+)",
 
-const std::string castleSceneDescription = R"(
+R"(
 size 536 240
 output castle.png
 
@@ -1787,9 +1787,9 @@ popTransform
 popTransform
 
 popTransform
-)";
+)",
 
-const std::string planetSceneDescription = R"(
+R"(
 size 536 240
 output tralfamadore.png
 
@@ -1896,9 +1896,9 @@ sphere 0.415 -0.15 0 0.004
 # CCWISE axes shifted left
 sphere 0.25 0.075 0 0.004
 sphere -0.25 -0.075 0 0.004
-)";
+)",
 
-const std::string iceCreamSceneDescription = R"(
+R"(
 size 536 240
 output ice_cream_sunrise_hexagon.png
 
@@ -1960,9 +1960,9 @@ tri 3 4 2
 tri 4 5 2
 tri 5 6 2
 tri 6 0 2
-)";
+)",
 
-const std::string pyramidSceneDescription = R"(
+R"(
 size 536 240
 output pyramid_red.png
 
@@ -2037,9 +2037,9 @@ pushTransform
 rotate 0 1 0 90 
 tri 4 5 6
 popTransform
-)";
+)",
 
-const std::string reflectiveSpheresSceneDescription = R"(
+R"(
 size 536 240
 output four_spheres.png
 
@@ -2074,9 +2074,9 @@ sphere 0 -0.75 -2 0.5
 # Blue
 ambient 0 0.262 0.344
 sphere 0 0.75 -2 0.5
-)";
+)",
 
-const std::string cakeSceneDescription = R"(
+R"(
 size 536 240
 output cake.png
 
@@ -2353,7 +2353,7 @@ scale 0.61 1 0.61
 
 sphere 0 0.428571 0 0.1
 popTransform
-)";
+)"};
 
 // const std::string ...SceneDescription = R"(
 // )";

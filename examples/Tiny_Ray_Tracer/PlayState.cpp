@@ -21,7 +21,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mRayTracingLabelSprite(&tft)
    , mPercentageProgressLabelSprite(&tft)
    , mProgressBarSprite(&tft)
-   , mFileParser(planetSceneDescription)
+   , mFileParser(sceneDescriptions[0])
    , mSceneDesc(nullptr)
    , mScene(nullptr)
    , mRayTracingSpriteSettings(3, 8, 6, "Ray-tracing...")
