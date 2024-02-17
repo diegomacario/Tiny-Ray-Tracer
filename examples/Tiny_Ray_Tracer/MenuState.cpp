@@ -112,7 +112,6 @@ void MenuState::enter()
       //mCellSprites[cellIndex].drawRoundRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
       mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), (cellIndex == mCurrentCellIndex) ? TFT_BLACK : TFT_WHITE);
       mCellSprites[cellIndex].drawString(mCells[cellIndex].mText.c_str(), mCells[cellIndex].mTextXPos, mCells[cellIndex].mTextYPos);
-
       mCellSprites[cellIndex].pushToSprite(&mSprite, mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, TFT_BLACK);
    }
 
@@ -127,6 +126,25 @@ void MenuState::update()
    bool nextSceneButtonIsPressed = checkNextSceneButton();
    if (nextSceneButtonIsPressed) {
       std::cout << "Next Pressed!" << '\n' ;
+
+      // Make the current cell black with white text
+      mCellSprites[mCurrentCellIndex].fillSprite(TFT_BLACK);
+      mCellSprites[mCurrentCellIndex].setTextColor(TFT_WHITE);
+      mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
+      mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
+      mCellSprites[mCurrentCellIndex].pushToSprite(&mSprite, mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos);
+
+      ++mCurrentCellIndex;
+      mCurrentCellIndex %= mCells.size();
+
+      // Make the selected cell white with black text
+      mCellSprites[mCurrentCellIndex].fillSprite(TFT_WHITE);
+      mCellSprites[mCurrentCellIndex].setTextColor(TFT_BLACK);
+      mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_BLACK);
+      mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
+      mCellSprites[mCurrentCellIndex].pushToSprite(&mSprite, mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos);
+
+      amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
    }
 
    bool selectSceneButtonIsPressed = checkSelectSceneButton();
