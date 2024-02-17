@@ -59,6 +59,7 @@ private:
 
    std::vector<Cell>                   mCells;
    std::vector<TFT_eSprite>            mCellSprites;
+   int32_t                             mCurrentCellIndex;
 
    int32_t                             mFontSize;
 

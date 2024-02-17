@@ -22,6 +22,7 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellWidth((mScreenWidth - (mCellHorizontalMargin * (mNumColumns + 1))) * (1.0f / mNumColumns))
    , mCellHeight((mScreenHeight - (mCellVerticalMargin * (mNumRows + 1))) * (1.0f / mNumRows))
    , mCellRadius(20)
+   , mCurrentCellIndex(0)
    , mNextSceneButtonPin(1)
    , mNextSceneButtonState(LOW)
    , mLastNextSceneButtonState(LOW)
@@ -96,13 +97,20 @@ void MenuState::enter()
    for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
       mCellSprites[cellIndex].createSprite(static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight));
       mCellSprites[cellIndex].setSwapBytes(1);
-      mCellSprites[cellIndex].fillSprite(TFT_BLACK);
-      mCellSprites[cellIndex].setTextColor(TFT_WHITE);
+
+      if (cellIndex == mCurrentCellIndex) {
+         mCellSprites[cellIndex].fillSprite(TFT_WHITE);
+         mCellSprites[cellIndex].setTextColor(TFT_BLACK);
+      } else {
+         mCellSprites[cellIndex].fillSprite(TFT_BLACK);
+         mCellSprites[cellIndex].setTextColor(TFT_WHITE);
+      }
+
       mCellSprites[cellIndex].setTextSize(mFontSize);
       mCellSprites[cellIndex].setTextFont(1);
 
       //mCellSprites[cellIndex].drawRoundRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
-      mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
+      mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), (cellIndex == mCurrentCellIndex) ? TFT_BLACK : TFT_WHITE);
       mCellSprites[cellIndex].drawString(mCells[cellIndex].mText.c_str(), mCells[cellIndex].mTextXPos, mCells[cellIndex].mTextYPos);
 
       mCellSprites[cellIndex].pushToSprite(&mSprite, mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, TFT_BLACK);
