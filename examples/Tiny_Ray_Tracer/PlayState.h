@@ -35,6 +35,7 @@ public:
 
 private:
 
+   bool checkCancelRenderButton();
    void updateRayTracingSprite();
    void updatePercentageProgressSprite(float progress);
    void updateProgressBar(float progress);
@@ -75,6 +76,12 @@ private:
    int32_t                             mPrevProgressWidth;
 
    bool                                mDoOnce;
+
+   const int                           mCancelRenderButtonPin;
+   int                                 mCancelRenderButtonState;
+   int                                 mLastCancelRenderButtonState;
+   unsigned long                       mLastCancelRenderButtonDebounceTime;
+   unsigned long                       mCancelRenderButtonDebounceDelay;
 };
 
 #endif

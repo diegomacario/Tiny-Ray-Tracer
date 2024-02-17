@@ -37,6 +37,11 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mProgressBarFillableHeight(mProgressBarHeight)
    , mPrevProgressWidth(0)
    , mDoOnce(true)
+   , mCancelRenderButtonPin(2)
+   , mCancelRenderButtonState(LOW)
+   , mLastCancelRenderButtonState(LOW)
+   , mLastCancelRenderButtonDebounceTime(0)
+   , mCancelRenderButtonDebounceDelay(50)
 {
 
 }
@@ -90,11 +95,23 @@ void PlayState::enter()
    mPrevProgressWidth = 0;
    mDoOnce = true;
 
+   mCancelRenderButtonState = LOW;
+   mLastCancelRenderButtonState = LOW;
+   mLastCancelRenderButtonDebounceTime = 0;
+
+   pinMode(mCancelRenderButtonPin, INPUT_PULLDOWN);
+
    amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
 }
 
 void PlayState::update()
 {
+   bool cancelRenderButtonIsPressed = checkCancelRenderButton();
+   if (cancelRenderButtonIsPressed) {
+      mFSM->changeState("menu");
+      return;
+   }
+
    if (mSampleGenerator.sampleIsAvailable())
    {
       mSampleGenerator.generateSample(mSample);
@@ -143,6 +160,37 @@ void PlayState::exit()
    mRayTracingLabelSprite.deleteSprite();
    mPercentageProgressLabelSprite.deleteSprite();
    mProgressBarSprite.deleteSprite();
+}
+
+bool PlayState::checkCancelRenderButton()
+{
+   bool cancelRenderButtonIsPressed = false;
+
+   int reading = digitalRead(mCancelRenderButtonPin);
+
+   if (reading != mLastCancelRenderButtonState) {
+      // Reset the debouncing timer
+      mLastCancelRenderButtonDebounceTime = millis();
+   }
+
+   if ((millis() - mLastCancelRenderButtonDebounceTime) > mCancelRenderButtonDebounceDelay) {
+      // Whatever the reading is at, it's been there for longer than the debounce delay,
+      // so take it as the actual current state
+
+      // If the button state has changed
+      if (reading != mCancelRenderButtonState) {
+         mCancelRenderButtonState = reading;
+
+         // If the new state of the button is HIGH
+         if (mCancelRenderButtonState == HIGH) {
+            cancelRenderButtonIsPressed = true;
+         }
+      }
+   }
+
+   mLastCancelRenderButtonState = reading;
+
+   return cancelRenderButtonIsPressed;
 }
 
 void PlayState::updateRayTracingSprite() {
