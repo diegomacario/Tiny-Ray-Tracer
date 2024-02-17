@@ -1,6 +1,7 @@
 #include <iomanip>
 
 #include "PlayState.h"
+#include "MenuState.h"
 #include "Data.h"
 
 // TODO: Figure out where to put this
@@ -21,7 +22,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mRayTracingLabelSprite(&tft)
    , mPercentageProgressLabelSprite(&tft)
    , mProgressBarSprite(&tft)
-   , mFileParser(sceneDescriptions[0])
+   , mFileParser(nullptr)
    , mSceneDesc(nullptr)
    , mScene(nullptr)
    , mRayTracingSpriteSettings(3, 8, 6, "Ray-tracing...")
@@ -54,7 +55,6 @@ void PlayState::enter()
    mRayTracingLabelSprite.setTextFont(1);
    mRayTracingLabelSprite.drawString("Ray-tracing", 0, 0);
    mRayTracingLabelSprite.setTextDatum(TL_DATUM);
-   amoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
 
    mPercentageProgressLabelSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
    mPercentageProgressLabelSprite.setSwapBytes(1);
@@ -64,13 +64,14 @@ void PlayState::enter()
    mPercentageProgressLabelSprite.setTextFont(1);
    mPercentageProgressLabelSprite.drawString("0.0%", mPercentageProgressSpriteSettings.spriteWidth, 0);
    mPercentageProgressLabelSprite.setTextDatum(TR_DATUM);
-   amoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelSprite.getPointer());
 
    mProgressBarSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
    mProgressBarSprite.setSwapBytes(1);
    mProgressBarSprite.fillSprite(TFT_BLACK);
 
-   mFileParser.readFile(mSceneDesc, mScene);
+   int32_t sceneDescriptionIndex = std::static_pointer_cast<MenuState>(mFSM->getPreviousState())->getCurrentCellIndex();
+   mFileParser.reset(new FileParser(sceneDescriptions[sceneDescriptionIndex]));
+   mFileParser->readFile(mSceneDesc, mScene);
 
    mSampleGenerator = RandomSampleGenerator(mSceneDesc->getWidth(), mSceneDesc->getHeight());
 
@@ -84,7 +85,12 @@ void PlayState::enter()
    mRay.origin = mSceneDesc->getEye();
    mRay.direction = Vector(0, 0, 0);
 
-   mLastTimeRayTracingSpriteWasUpdated = millis();
+   mNumDots = 0;
+   mLastTimeRayTracingSpriteWasUpdated = 0;
+   mPrevProgressWidth = 0;
+   mDoOnce = true;
+
+   amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
 }
 
 void PlayState::update()

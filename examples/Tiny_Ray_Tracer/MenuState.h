@@ -31,6 +31,8 @@ public:
    void update() override;
    void exit() override;
 
+   int32_t getCurrentCellIndex() { return mCurrentCellIndex; };
+
 private:
 
    bool checkNextSceneButton();

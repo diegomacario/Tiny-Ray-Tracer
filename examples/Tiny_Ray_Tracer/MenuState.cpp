@@ -140,6 +140,8 @@ void MenuState::update()
    bool selectSceneButtonIsPressed = checkSelectSceneButton();
    if (selectSceneButtonIsPressed) {
       std::cout << "Select Pressed!" << '\n' ;
+      mFSM->changeState("play");
+      return;
    }
 }
 

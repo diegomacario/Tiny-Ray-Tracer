@@ -51,7 +51,7 @@ private:
    TFT_eSprite                         mPercentageProgressLabelSprite;
    TFT_eSprite                         mProgressBarSprite;
 
-   FileParser                          mFileParser;
+   std::unique_ptr<FileParser>         mFileParser;
    std::unique_ptr<SceneDescription>   mSceneDesc;
    std::unique_ptr<Scene>              mScene;
    RandomSampleGenerator               mSampleGenerator;
