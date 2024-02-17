@@ -43,8 +43,6 @@ private:
    const uint16_t                      mScreenWidth;
    const uint16_t                      mScreenHeight;
 
-   TFT_eSprite                         mSprite;
-
    int32_t                             mNumRows;
    int32_t                             mNumColumns;
 

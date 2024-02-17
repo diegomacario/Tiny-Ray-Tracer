@@ -12,7 +12,6 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , amoled(amoled)
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
-   , mSprite(&tft)
    , mNumRows(4)
    , mNumColumns(2)
    , mCellHorizontalMargin(10)
@@ -87,13 +86,6 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
 
 void MenuState::enter()
 {
-   mSprite.createSprite(mScreenWidth, mScreenHeight);
-   mSprite.setSwapBytes(1);
-   mSprite.fillSprite(TFT_BLACK);
-   mSprite.setTextColor(TFT_WHITE);
-   mSprite.setTextSize(mFontSize);
-   mSprite.setTextFont(1);
-
    for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
       mCellSprites[cellIndex].createSprite(static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight));
       mCellSprites[cellIndex].setSwapBytes(1);
@@ -112,10 +104,8 @@ void MenuState::enter()
       //mCellSprites[cellIndex].drawRoundRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
       mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), (cellIndex == mCurrentCellIndex) ? TFT_BLACK : TFT_WHITE);
       mCellSprites[cellIndex].drawString(mCells[cellIndex].mText.c_str(), mCells[cellIndex].mTextXPos, mCells[cellIndex].mTextYPos);
-      mCellSprites[cellIndex].pushToSprite(&mSprite, mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, TFT_BLACK);
+      amoled->pushColors(mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[cellIndex].getPointer());
    }
-
-   amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
 
    pinMode(mNextSceneButtonPin, INPUT_PULLDOWN);
    pinMode(mSelectSceneButtonPin, INPUT_PULLDOWN);
@@ -132,7 +122,8 @@ void MenuState::update()
       mCellSprites[mCurrentCellIndex].setTextColor(TFT_WHITE);
       mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
       mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
-      mCellSprites[mCurrentCellIndex].pushToSprite(&mSprite, mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos);
+
+      amoled->pushColors(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
 
       ++mCurrentCellIndex;
       mCurrentCellIndex %= mCells.size();
@@ -142,9 +133,8 @@ void MenuState::update()
       mCellSprites[mCurrentCellIndex].setTextColor(TFT_BLACK);
       mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_BLACK);
       mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
-      mCellSprites[mCurrentCellIndex].pushToSprite(&mSprite, mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos);
 
-      amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mSprite.getPointer());
+      amoled->pushColors(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
    }
 
    bool selectSceneButtonIsPressed = checkSelectSceneButton();
@@ -155,7 +145,9 @@ void MenuState::update()
 
 void MenuState::exit()
 {
-   mSprite.deleteSprite();
+   for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
+      mCellSprites[cellIndex].deleteSprite();
+   }
 }
 
 bool MenuState::checkNextSceneButton()
