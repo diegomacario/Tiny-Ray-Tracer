@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <iostream>
 
 #include "MenuState.h"
 
@@ -120,8 +119,6 @@ void MenuState::update()
 {
    bool nextSceneButtonIsPressed = checkNextSceneButton();
    if (nextSceneButtonIsPressed) {
-      std::cout << "Next Pressed!" << '\n' ;
-
       // Make the current cell black with white text
       mCellSprites[mCurrentCellIndex].fillSprite(TFT_BLACK);
       mCellSprites[mCurrentCellIndex].setTextColor(TFT_WHITE);
@@ -144,8 +141,6 @@ void MenuState::update()
 
    bool selectSceneButtonIsPressed = checkSelectSceneButton();
    if (selectSceneButtonIsPressed) {
-      std::cout << "Select Pressed!" << '\n' ;
-
       // Make the selected cell green with white text
       mCellSprites[mCurrentCellIndex].fillSprite(TFT_GREEN);
       mCellSprites[mCurrentCellIndex].setTextColor(TFT_WHITE);
