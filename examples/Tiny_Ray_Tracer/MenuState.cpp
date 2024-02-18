@@ -22,12 +22,12 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mCellHeight((mScreenHeight - (mCellVerticalMargin * (mNumRows + 1))) * (1.0f / mNumRows))
    , mCellRadius(20)
    , mCurrentCellIndex(0)
-   , mNextSceneButtonPin(1)
+   , mNextSceneButtonPin(2)
    , mNextSceneButtonState(LOW)
    , mLastNextSceneButtonState(LOW)
    , mLastNextSceneButtonDebounceTime(0)
    , mNextSceneButtonDebounceDelay(50)
-   , mSelectSceneButtonPin(2)
+   , mSelectSceneButtonPin(1)
    , mSelectSceneButtonState(LOW)
    , mLastSelectSceneButtonState(LOW)
    , mLastSelectSceneButtonDebounceTime(0)
@@ -88,14 +88,12 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
 void MenuState::enter()
 {
    mResetScreenSprite.createSprite(mScreenWidth, mScreenHeight);
-   mResetScreenSprite.setSwapBytes(1);
    mResetScreenSprite.fillSprite(TFT_BLACK);
    mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mResetScreenSprite.getPointer());
    mResetScreenSprite.deleteSprite();
 
    for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
       mCellSprites[cellIndex].createSprite(static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight));
-      mCellSprites[cellIndex].setSwapBytes(1);
 
       if (cellIndex == mCurrentCellIndex) {
          mCellSprites[cellIndex].fillSprite(TFT_WHITE);
