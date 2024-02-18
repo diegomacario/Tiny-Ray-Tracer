@@ -158,6 +158,13 @@ void PlayState::update()
             mRayTracingLabelBackgroundSpriteChanged = true;
          }
 
+         int32_t percentageProgressLabelXPos = mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth;
+         if ((mSample.x >= percentageProgressLabelXPos) && (mSample.y < mPercentageProgressSpriteSettings.spriteHeight)) {
+            // We rendered a pixel that's behind mPercentageProgressLabelSprite
+            // Let's save it in mPercentageProgressLabelBackgroundSprite
+            mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y, colour);
+         }
+
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
          mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
@@ -268,8 +275,9 @@ void PlayState::updatePercentageProgressSprite(float progress) {
     std::string numberAsString = stream.str();
     numberAsString += "%";
     mPercentageProgressLabelSprite.drawString(numberAsString.c_str(), mPercentageProgressSpriteSettings.spriteWidth, 0);
-
-    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelSprite.getPointer());
+    mPercentageProgressLabelBackgroundSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0);
+    mPercentageProgressLabelSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0, TFT_BLACK);
+    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
 }
 
 void PlayState::updateProgressBar(float progress) {
