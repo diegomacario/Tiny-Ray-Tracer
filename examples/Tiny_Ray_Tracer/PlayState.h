@@ -58,6 +58,8 @@ private:
    TFT_eSprite                         mPercentageProgressLabelMixedSprite;
 
    TFT_eSprite                         mProgressBarSprite;
+   TFT_eSprite                         mProgressBarBackgroundSprite;
+   TFT_eSprite                         mProgressBarMixedSprite;
 
    std::unique_ptr<FileParser>         mFileParser;
    std::unique_ptr<SceneDescription>   mSceneDesc;

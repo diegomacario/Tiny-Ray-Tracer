@@ -26,6 +26,8 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mPercentageProgressLabelBackgroundSprite(&tft)
    , mPercentageProgressLabelMixedSprite(&tft)
    , mProgressBarSprite(&tft)
+   , mProgressBarBackgroundSprite(&tft)
+   , mProgressBarMixedSprite(&tft)
    , mFileParser(nullptr)
    , mSceneDesc(nullptr)
    , mScene(nullptr)
@@ -92,8 +94,13 @@ void PlayState::enter()
    mPercentageProgressLabelMixedSprite.fillSprite(TFT_BLACK);
 
    mProgressBarSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
-   mProgressBarSprite.setSwapBytes(1);
    mProgressBarSprite.fillSprite(TFT_BLACK);
+
+   mProgressBarBackgroundSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
+   mProgressBarBackgroundSprite.fillSprite(TFT_BLACK);
+
+   mProgressBarMixedSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
+   mProgressBarMixedSprite.fillSprite(TFT_BLACK);
 
    int32_t sceneDescriptionIndex = std::static_pointer_cast<MenuState>(mFSM->getPreviousState())->getCurrentCellIndex();
    mFileParser.reset(new FileParser(sceneDescriptions[sceneDescriptionIndex]));
@@ -165,6 +172,15 @@ void PlayState::update()
             mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y, colour);
          }
 
+         if ((mSample.x >= mProgressBarXPosition) &&
+             (mSample.x < mProgressBarXPosition + mProgressBarWidth) &&
+             (mSample.y >= mProgressBarYPosition) &&
+             (mSample.y < mProgressBarYPosition + mProgressBarHeight)) {
+            // We rendered a pixel that's behind mProgressBarSprite
+            // Let's save it in mProgressBarBackgroundSprite
+            mProgressBarBackgroundSprite.drawPixel(mSample.x - mProgressBarXPosition, mSample.y - mProgressBarYPosition, colour);
+         }
+
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
          mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
@@ -202,6 +218,8 @@ void PlayState::exit()
    mPercentageProgressLabelBackgroundSprite.deleteSprite();
    mPercentageProgressLabelMixedSprite.deleteSprite();
    mProgressBarSprite.deleteSprite();
+   mProgressBarBackgroundSprite.deleteSprite();
+   mProgressBarMixedSprite.deleteSprite();
 }
 
 bool PlayState::checkCancelRenderButton()
@@ -288,5 +306,8 @@ void PlayState::updateProgressBar(float progress) {
         mProgressBarSprite.fillRect(1, 1, progressWidth, mProgressBarFillableHeight, TFT_GREEN);
         mPrevProgressWidth = progressWidth;
     }
-    mAmoled->pushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarSprite.getPointer());
+
+    mProgressBarBackgroundSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0);
+    mProgressBarSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0, TFT_BLACK);
+    mAmoled->pushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarMixedSprite.getPointer());
 }
