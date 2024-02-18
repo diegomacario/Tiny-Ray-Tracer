@@ -18,7 +18,9 @@ Description:
    - Cake
 */
 
-std::vector<std::string> sceneDescriptions = {R"(
+std::vector<std::string> sceneDescriptions = {
+// Sword
+R"(
 size 536 240
 output sword.png
 
@@ -318,6 +320,7 @@ tri 45 40 34
 popTransform
 )",
 
+// Rupee
 R"(
 size 536 240 
 output rupee.png
@@ -428,6 +431,7 @@ tri 12 7 1
 popTransform
 )",
 
+// Castle
 R"(
 size 536 240
 output castle.png
@@ -1789,6 +1793,7 @@ popTransform
 popTransform
 )",
 
+// Planet
 R"(
 size 536 240
 output tralfamadore.png
@@ -1898,6 +1903,7 @@ sphere 0.25 0.075 0 0.004
 sphere -0.25 -0.075 0 0.004
 )",
 
+// Ice Cream
 R"(
 size 536 240
 output ice_cream_sunrise_hexagon.png
@@ -1962,6 +1968,7 @@ tri 5 6 2
 tri 6 0 2
 )",
 
+// Pyramid
 R"(
 size 536 240
 output pyramid_red.png
@@ -2039,6 +2046,7 @@ tri 4 5 6
 popTransform
 )",
 
+// Spheres
 R"(
 size 536 240
 output four_spheres.png
@@ -2076,6 +2084,7 @@ ambient 0 0.262 0.344
 sphere 0 0.75 -2 0.5
 )",
 
+// Cake
 R"(
 size 536 240
 output cake.png
