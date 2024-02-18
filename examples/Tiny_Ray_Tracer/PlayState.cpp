@@ -147,7 +147,7 @@ void PlayState::update()
       mRayTracingLabelSprite.drawString(doneString.c_str(), 0, 0);
       mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
 
-      sleep(2);
+      delay(2000);
 
       mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
       mDoOnce = false;
