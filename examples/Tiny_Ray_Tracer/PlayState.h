@@ -49,6 +49,8 @@ private:
 
    TFT_eSprite                         mImageRenderingSprite;
    TFT_eSprite                         mRayTracingLabelSprite;
+   TFT_eSprite                         mRayTracingLabelBackgroundSprite;
+   TFT_eSprite                         mRayTracingLabelMixedSprite;
    TFT_eSprite                         mPercentageProgressLabelSprite;
    TFT_eSprite                         mProgressBarSprite;
 
@@ -64,6 +66,7 @@ private:
    TextSpriteSettings                  mRayTracingSpriteSettings;
    uint32_t                            mNumDots;
    unsigned long                       mLastTimeRayTracingSpriteWasUpdated;
+   bool                                mRayTracingLabelBackgroundSpriteChanged;
 
    TextSpriteSettings                  mPercentageProgressSpriteSettings;
 

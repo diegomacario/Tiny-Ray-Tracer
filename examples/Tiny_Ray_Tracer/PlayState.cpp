@@ -20,6 +20,8 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mScreenHeight(screenHeight)
    , mImageRenderingSprite(&tft)
    , mRayTracingLabelSprite(&tft)
+   , mRayTracingLabelBackgroundSprite(&tft)
+   , mRayTracingLabelMixedSprite(&tft)
    , mPercentageProgressLabelSprite(&tft)
    , mProgressBarSprite(&tft)
    , mFileParser(nullptr)
@@ -28,6 +30,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mRayTracingSpriteSettings(3, 8, 6, "Ray-tracing...")
    , mNumDots(0)
    , mLastTimeRayTracingSpriteWasUpdated(0)
+   , mRayTracingLabelBackgroundSpriteChanged(false)
    , mPercentageProgressSpriteSettings(3, 8, 6, "100.0%")
    , mProgressBarWidth(536)
    , mProgressBarHeight(10)
@@ -60,6 +63,14 @@ void PlayState::enter()
    mRayTracingLabelSprite.setTextFont(1);
    mRayTracingLabelSprite.drawString("Ray-tracing", 0, 0);
    mRayTracingLabelSprite.setTextDatum(TL_DATUM);
+
+   mRayTracingLabelBackgroundSprite.createSprite(mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight);
+   mRayTracingLabelBackgroundSprite.setSwapBytes(1);
+   mRayTracingLabelBackgroundSprite.fillSprite(TFT_BLACK);
+
+   mRayTracingLabelMixedSprite.createSprite(mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight);
+   mRayTracingLabelMixedSprite.setSwapBytes(1);
+   mRayTracingLabelMixedSprite.fillSprite(TFT_BLACK);
 
    mPercentageProgressLabelSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
    mPercentageProgressLabelSprite.setSwapBytes(1);
@@ -129,6 +140,14 @@ void PlayState::update()
          uint32_t colour = rgb888ToRgb565(r, g, b);
 
          mImageRenderingSprite.drawPixel(mSample.x, mSample.y, colour);
+
+         if ((mSample.x < mRayTracingSpriteSettings.spriteWidth) && (mSample.y < mRayTracingSpriteSettings.spriteHeight)) {
+            // We rendered a pixel that's behind mRayTracingLabelSprite
+            // Let's save it in mRayTracingLabelBackgroundSprite
+            mRayTracingLabelBackgroundSprite.drawPixel(mSample.x, mSample.y, colour);
+            mRayTracingLabelBackgroundSpriteChanged = true;
+         }
+
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
          mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
@@ -158,6 +177,8 @@ void PlayState::exit()
 {
    mImageRenderingSprite.deleteSprite();
    mRayTracingLabelSprite.deleteSprite();
+   mRayTracingLabelBackgroundSprite.deleteSprite();
+   mRayTracingLabelMixedSprite.deleteSprite();
    mPercentageProgressLabelSprite.deleteSprite();
    mProgressBarSprite.deleteSprite();
 }
@@ -215,8 +236,16 @@ void PlayState::updateRayTracingSprite() {
                 break;
         }
         mRayTracingLabelSprite.drawString(rayTracingString.c_str(), 0, 0);
-        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
+        mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
+        mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
+        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
         mLastTimeRayTracingSpriteWasUpdated = millis();
+        mRayTracingLabelBackgroundSpriteChanged = false;
+    } else if (mRayTracingLabelBackgroundSpriteChanged) {
+        mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
+        mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
+        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+        mRayTracingLabelBackgroundSpriteChanged = false;
     }
 }
 
