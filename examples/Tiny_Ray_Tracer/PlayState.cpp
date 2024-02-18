@@ -44,7 +44,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mProgressBarFillableHeight(mProgressBarHeight)
    , mPrevProgressWidth(0)
    , mDoOnce(true)
-   , mCancelRenderButtonPin(2)
+   , mCancelRenderButtonPin(1)
    , mCancelRenderButtonState(LOW)
    , mLastCancelRenderButtonState(LOW)
    , mLastCancelRenderButtonDebounceTime(0)
@@ -56,11 +56,9 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
 void PlayState::enter()
 {
    mImageRenderingSprite.createSprite(mScreenWidth, mScreenHeight);
-   mImageRenderingSprite.setSwapBytes(1);
    mImageRenderingSprite.fillSprite(TFT_BLACK);
 
    mRayTracingLabelSprite.createSprite(mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight);
-   mRayTracingLabelSprite.setSwapBytes(1);
    mRayTracingLabelSprite.fillSprite(TFT_BLACK);
    mRayTracingLabelSprite.setTextColor(TFT_WHITE);
    mRayTracingLabelSprite.setTextSize(mRayTracingSpriteSettings.textSize);
@@ -69,15 +67,12 @@ void PlayState::enter()
    mRayTracingLabelSprite.setTextDatum(TL_DATUM);
 
    mRayTracingLabelBackgroundSprite.createSprite(mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight);
-   mRayTracingLabelBackgroundSprite.setSwapBytes(1);
    mRayTracingLabelBackgroundSprite.fillSprite(TFT_BLACK);
 
    mRayTracingLabelMixedSprite.createSprite(mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight);
-   mRayTracingLabelMixedSprite.setSwapBytes(1);
    mRayTracingLabelMixedSprite.fillSprite(TFT_BLACK);
 
    mPercentageProgressLabelSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
-   mPercentageProgressLabelSprite.setSwapBytes(1);
    mPercentageProgressLabelSprite.fillSprite(TFT_BLACK);
    mPercentageProgressLabelSprite.setTextColor(TFT_WHITE);
    mPercentageProgressLabelSprite.setTextSize(mPercentageProgressSpriteSettings.textSize);
@@ -86,11 +81,9 @@ void PlayState::enter()
    mPercentageProgressLabelSprite.setTextDatum(TR_DATUM);
 
    mPercentageProgressLabelBackgroundSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
-   mPercentageProgressLabelBackgroundSprite.setSwapBytes(1);
    mPercentageProgressLabelBackgroundSprite.fillSprite(TFT_BLACK);
 
    mPercentageProgressLabelMixedSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
-   mPercentageProgressLabelMixedSprite.setSwapBytes(1);
    mPercentageProgressLabelMixedSprite.fillSprite(TFT_BLACK);
 
    mProgressBarSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
