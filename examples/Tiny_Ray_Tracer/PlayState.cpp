@@ -159,10 +159,11 @@ void PlayState::update()
          }
 
          int32_t percentageProgressLabelXPos = mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth;
-         if ((mSample.x >= percentageProgressLabelXPos) && (mSample.y < mPercentageProgressSpriteSettings.spriteHeight)) {
+         int32_t percentageProgressLabelYPos = mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight;
+         if ((mSample.x >= percentageProgressLabelXPos) && (mSample.y >= percentageProgressLabelYPos)) {
             // We rendered a pixel that's behind mPercentageProgressLabelSprite
             // Let's save it in mPercentageProgressLabelBackgroundSprite
-            mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y, colour);
+            mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y - percentageProgressLabelYPos, colour);
          }
 
          if ((mSample.x >= mProgressBarXPosition) &&
@@ -184,7 +185,7 @@ void PlayState::update()
 
       updateRayTracingSprite();
       updatePercentageProgressSprite(progress);
-      updateProgressBar(progress);
+      //updateProgressBar(progress);
    }
    else if (mDoOnce) {
       mRayTracingLabelSprite.fillSprite(TFT_BLACK);
@@ -290,7 +291,11 @@ void PlayState::updatePercentageProgressSprite(float progress) {
     mPercentageProgressLabelSprite.drawString(numberAsString.c_str(), mPercentageProgressSpriteSettings.spriteWidth, 0);
     mPercentageProgressLabelBackgroundSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0);
     mPercentageProgressLabelSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0, TFT_BLACK);
-    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
+    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth,
+                        mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight,
+                        mPercentageProgressSpriteSettings.spriteWidth,
+                        mPercentageProgressSpriteSettings.spriteHeight,
+                        (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
 }
 
 void PlayState::updateProgressBar(float progress) {
