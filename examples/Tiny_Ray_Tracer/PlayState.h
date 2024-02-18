@@ -48,10 +48,15 @@ private:
    const uint16_t                      mScreenHeight;
 
    TFT_eSprite                         mImageRenderingSprite;
+
    TFT_eSprite                         mRayTracingLabelSprite;
    TFT_eSprite                         mRayTracingLabelBackgroundSprite;
    TFT_eSprite                         mRayTracingLabelMixedSprite;
+
    TFT_eSprite                         mPercentageProgressLabelSprite;
+   TFT_eSprite                         mPercentageProgressLabelBackgroundSprite;
+   TFT_eSprite                         mPercentageProgressLabelMixedSprite;
+
    TFT_eSprite                         mProgressBarSprite;
 
    std::unique_ptr<FileParser>         mFileParser;

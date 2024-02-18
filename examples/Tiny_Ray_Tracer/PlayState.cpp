@@ -23,6 +23,8 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
    , mRayTracingLabelBackgroundSprite(&tft)
    , mRayTracingLabelMixedSprite(&tft)
    , mPercentageProgressLabelSprite(&tft)
+   , mPercentageProgressLabelBackgroundSprite(&tft)
+   , mPercentageProgressLabelMixedSprite(&tft)
    , mProgressBarSprite(&tft)
    , mFileParser(nullptr)
    , mSceneDesc(nullptr)
@@ -80,6 +82,14 @@ void PlayState::enter()
    mPercentageProgressLabelSprite.setTextFont(1);
    mPercentageProgressLabelSprite.drawString("0.0%", mPercentageProgressSpriteSettings.spriteWidth, 0);
    mPercentageProgressLabelSprite.setTextDatum(TR_DATUM);
+
+   mPercentageProgressLabelBackgroundSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
+   mPercentageProgressLabelBackgroundSprite.setSwapBytes(1);
+   mPercentageProgressLabelBackgroundSprite.fillSprite(TFT_BLACK);
+
+   mPercentageProgressLabelMixedSprite.createSprite(mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight);
+   mPercentageProgressLabelMixedSprite.setSwapBytes(1);
+   mPercentageProgressLabelMixedSprite.fillSprite(TFT_BLACK);
 
    mProgressBarSprite.createSprite(mProgressBarWidth, mProgressBarHeight);
    mProgressBarSprite.setSwapBytes(1);
@@ -180,6 +190,8 @@ void PlayState::exit()
    mRayTracingLabelBackgroundSprite.deleteSprite();
    mRayTracingLabelMixedSprite.deleteSprite();
    mPercentageProgressLabelSprite.deleteSprite();
+   mPercentageProgressLabelBackgroundSprite.deleteSprite();
+   mPercentageProgressLabelMixedSprite.deleteSprite();
    mProgressBarSprite.deleteSprite();
 }
 
