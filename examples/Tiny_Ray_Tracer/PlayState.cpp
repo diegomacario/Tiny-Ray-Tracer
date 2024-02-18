@@ -181,7 +181,9 @@ void PlayState::update()
       mRayTracingLabelSprite.fillSprite(TFT_BLACK);
       std::string doneString = "Done!";
       mRayTracingLabelSprite.drawString(doneString.c_str(), 0, 0);
-      mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
+      mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
+      mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
+      mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
 
       delay(2000);
 
