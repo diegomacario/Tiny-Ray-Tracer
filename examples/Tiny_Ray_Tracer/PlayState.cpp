@@ -15,7 +15,7 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
                      uint16_t screenWidth,
                      uint16_t screenHeight)
    : mFSM(finiteStateMachine)
-   , amoled(amoled)
+   , mAmoled(amoled)
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
    , mImageRenderingSprite(&tft)
@@ -101,7 +101,7 @@ void PlayState::enter()
 
    pinMode(mCancelRenderButtonPin, INPUT_PULLDOWN);
 
-   amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+   mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
 }
 
 void PlayState::update()
@@ -131,8 +131,8 @@ void PlayState::update()
          mImageRenderingSprite.drawPixel(mSample.x, mSample.y, colour);
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
-         amoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
-         amoled->pushColors(pixelPtr, 1);
+         mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
+         mAmoled->pushColors(pixelPtr, 1);
       }
 
       float progress = mSampleGenerator.getProgress();
@@ -145,11 +145,11 @@ void PlayState::update()
       mRayTracingLabelSprite.fillSprite(TFT_BLACK);
       std::string doneString = "Done!";
       mRayTracingLabelSprite.drawString(doneString.c_str(), 0, 0);
-      amoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
+      mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
 
       sleep(2);
 
-      amoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+      mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
       mDoOnce = false;
    }
 }
@@ -215,7 +215,7 @@ void PlayState::updateRayTracingSprite() {
                 break;
         }
         mRayTracingLabelSprite.drawString(rayTracingString.c_str(), 0, 0);
-        amoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
+        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelSprite.getPointer());
         mLastTimeRayTracingSpriteWasUpdated = millis();
     }
 }
@@ -228,7 +228,7 @@ void PlayState::updatePercentageProgressSprite(float progress) {
     numberAsString += "%";
     mPercentageProgressLabelSprite.drawString(numberAsString.c_str(), mPercentageProgressSpriteSettings.spriteWidth, 0);
 
-    amoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelSprite.getPointer());
+    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth, 0, mPercentageProgressSpriteSettings.spriteWidth, mPercentageProgressSpriteSettings.spriteHeight, (uint16_t *)mPercentageProgressLabelSprite.getPointer());
 }
 
 void PlayState::updateProgressBar(float progress) {
@@ -237,5 +237,5 @@ void PlayState::updateProgressBar(float progress) {
         mProgressBarSprite.fillRect(1, 1, progressWidth, mProgressBarFillableHeight, TFT_GREEN);
         mPrevProgressWidth = progressWidth;
     }
-    amoled->pushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarSprite.getPointer());
+    mAmoled->pushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarSprite.getPointer());
 }

@@ -40,7 +40,7 @@ private:
 
    std::shared_ptr<FiniteStateMachine> mFSM;
 
-   LilyGo_Class*                       amoled;
+   LilyGo_Class*                       mAmoled;
 
    const uint16_t                      mScreenWidth;
    const uint16_t                      mScreenHeight;
@@ -74,6 +74,8 @@ private:
    int                                 mLastSelectSceneButtonState;
    unsigned long                       mLastSelectSceneButtonDebounceTime;
    unsigned long                       mSelectSceneButtonDebounceDelay;
+
+   TFT_eSprite                         mResetScreenSprite;
 };
 
 #endif
