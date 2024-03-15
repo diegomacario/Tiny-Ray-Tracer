@@ -3,14 +3,23 @@
 #include "Arduino.h"
 #include "driver/spi_master.h"
 
+volatile bool TE_flag=false;
+
+void IRAM_ATTR ISR() 
+{
+    TE_flag=true;
+}
+
+
+
 const static lcd_cmd_t rm67162_spi_init[] = {
-    {0xFE, {0x00}, 0x01}, // PAGE
-    // {0x35, {0x00},        0x00}, //TE ON
-    // {0x34, {0x00},        0x00}, //TE OFF
-    {0x36, {0x00}, 0x01}, // Scan Direction Control
-    {0x3A, {0x75}, 0x01}, // Interface Pixel Format	16bit/pixel
-    // {0x3A, {0x76},        0x01}, //Interface Pixel Format	18bit/pixel
-    // {0x3A, {0x77},        0x01}, //Interface Pixel Format	24bit/pixel
+    {0xFE, {0x00}, 0x01},        // PAGE
+    // {0x35, {0x00}, 0x00},     // TE ON
+    // {0x34, {0x00}, 0x00},     // TE OFF
+    {0x36, {0x00}, 0x01},        // Scan Direction Control
+    {0x3A, {0x75}, 0x01},        // Interface Pixel Format	16bit/pixel
+    // {0x3A, {0x76}, 0x01},     // Interface Pixel Format	18bit/pixel
+    // {0x3A, {0x77}, 0x01},     // Interface Pixel Format	24bit/pixel
     {0x51, {0x00}, 0x01},        // Write Display Brightness MAX_VAL=0XFF
     {0x11, {0x00}, 0x01 | 0x80}, // Sleep Out
     {0x29, {0x00}, 0x01 | 0x80}, // Display on
@@ -18,17 +27,17 @@ const static lcd_cmd_t rm67162_spi_init[] = {
 };
 
 const static lcd_cmd_t rm67162_qspi_init[] = {
-    {0x11, {0x00}, 0x80}, // Sleep Out
-    // {0x44, {0x01, 0x66},        0x02}, //Set_Tear_Scanline
-    // {0x35, {0x00},        0x00}, //TE ON
-    // {0x34, {0x00},        0x00}, //TE OFF
-    // {0x36, {0x00},        0x01}, //Scan Direction Control
-    {0x3A, {0x55}, 0x01}, // Interface Pixel Format	16bit/pixel
-    // {0x3A, {0x66},        0x01}, //Interface Pixel Format	18bit/pixel
-    // {0x3A, {0x77},        0x01}, //Interface Pixel Format	24bit/pixel
-    {0x51, {0x00}, 0x01}, // Write Display Brightness MAX_VAL=0XFF
-    {0x29, {0x00}, 0x80}, // Display on
-    {0x51, {0xD0}, 0x01}, // Write Display Brightness	MAX_VAL=0XFF
+    {0x11, {0x00}, 0x80},        // Sleep Out
+    {0x44, {0x02, 23}, 0x02},    // Set_Tear_Scanline to line 535 (0-535)
+    {0x35, {0x00},0x01},         // TE ON
+    // {0x34, {0x00}, 0x00},     // TE OFF
+    // {0x36, {0x00}, 0x01},     // Scan Direction Control
+    {0x3A, {0x55}, 0x01},        // Interface Pixel Format	16bit/pixel
+    // {0x3A, {0x66},0x01},      // Interface Pixel Format	18bit/pixel
+    // {0x3A, {0x77},0x01},      // Interface Pixel Format	24bit/pixel
+    {0x51, {0x00}, 0x01},        // Write Display Brightness MAX_VAL=0XFF
+    {0x29, {0x00}, 0x80},        // Display on
+    {0x51, {0xD0}, 0x01},        // Write Display Brightness	MAX_VAL=0XFF
 };
 
 static spi_device_handle_t spi;
@@ -261,7 +270,14 @@ void lcd_PushColors(uint16_t x,
         t.base.tx_buffer = p;
         t.base.length = chunk_size * 16;
 
-        // spi_device_queue_trans(spi, (spi_transaction_t *)&t, portMAX_DELAY);
+        
+        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period
+        if(TE_flag==true )  TE_flag=false;    
+
+        //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.
+        while (TE_flag==false) 
+        ;        
+
         spi_device_polling_transmit(spi, (spi_transaction_t *)&t);
         len -= chunk_size;
         p += chunk_size;
@@ -313,8 +329,15 @@ void lcd_PushColors(uint16_t *data, uint32_t len)
         t.base.tx_buffer = p;
         t.base.length = chunk_size * 16;
 
-        // spi_device_queue_trans(spi, (spi_transaction_t *)&t, portMAX_DELAY);
+        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period
+        if(TE_flag==true )  TE_flag=false;    
+
+        //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.
+        while (TE_flag==false) 
+        ;        
+        
         spi_device_polling_transmit(spi, (spi_transaction_t *)&t);
+        TE_flag=false;
         len -= chunk_size;
         p += chunk_size;
     } while (len > 0);

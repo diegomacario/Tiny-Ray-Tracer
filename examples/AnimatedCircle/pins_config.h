@@ -3,7 +3,7 @@
 /***********************config*************************/
 #define LCD_USB_QSPI_DREVER   1
 
-#define SPI_FREQUENCY         75000000
+#define SPI_FREQUENCY         80000000 //normally 75000000
 #define TFT_SPI_MODE          SPI_MODE0
 #define TFT_SPI_HOST          SPI2_HOST
 
@@ -30,7 +30,7 @@
 
 #define TFT_WIDTH             240
 #define TFT_HEIGHT            536
-#define SEND_BUF_SIZE         (0x4000) //(LCD_WIDTH * LCD_HEIGHT + 8) / 10
+#define SEND_BUF_SIZE         16080//(LCD_WIDTH * LCD_HEIGHT) / 8
 
 #define TFT_TE                9
 #define TFT_SDO               8
