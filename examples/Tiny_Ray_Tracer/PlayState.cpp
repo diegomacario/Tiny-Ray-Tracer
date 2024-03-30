@@ -1,5 +1,7 @@
 #include <iomanip>
 
+#include "rm67162.h"
+
 #include "PlayState.h"
 #include "MenuState.h"
 #include "Data.h"
@@ -10,12 +12,10 @@ uint32_t rgb888ToRgb565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-                     LilyGo_Class* amoled,
                      TFT_eSPI& tft,
                      uint16_t screenWidth,
                      uint16_t screenHeight)
    : mFSM(finiteStateMachine)
-   , mAmoled(amoled)
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
    , mImageRenderingSprite(&tft)
@@ -122,7 +122,7 @@ void PlayState::enter()
 
    pinMode(mCancelRenderButtonPin, INPUT_PULLDOWN);
 
-   mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+   lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
 }
 
 void PlayState::update()
@@ -177,8 +177,9 @@ void PlayState::update()
 
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
-         mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
-         mAmoled->pushColors(pixelPtr, 1);
+         //mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
+         //mAmoled->pushColors(pixelPtr, 1);
+         lcd_DrawPoint(mSample.x, mSample.y, *pixelPtr);
       }
 
       float progress = mSampleGenerator.getProgress();
@@ -193,11 +194,11 @@ void PlayState::update()
       mRayTracingLabelSprite.drawString(doneString.c_str(), 0, 0);
       mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
       mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-      mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+      lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
 
       delay(2000);
 
-      mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+      lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
       mDoOnce = false;
    }
 }
@@ -271,13 +272,13 @@ void PlayState::updateRayTracingSprite() {
         mRayTracingLabelSprite.drawString(rayTracingString.c_str(), 0, 0);
         mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
         mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+        lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
         mLastTimeRayTracingSpriteWasUpdated = millis();
         mRayTracingLabelBackgroundSpriteChanged = false;
     } else if (mRayTracingLabelBackgroundSpriteChanged) {
         mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
         mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-        mAmoled->pushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+        lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
         mRayTracingLabelBackgroundSpriteChanged = false;
     }
 }
@@ -291,11 +292,11 @@ void PlayState::updatePercentageProgressSprite(float progress) {
     mPercentageProgressLabelSprite.drawString(numberAsString.c_str(), mPercentageProgressSpriteSettings.spriteWidth, 0);
     mPercentageProgressLabelBackgroundSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0);
     mPercentageProgressLabelSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0, TFT_BLACK);
-    mAmoled->pushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth,
-                        mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight,
-                        mPercentageProgressSpriteSettings.spriteWidth,
-                        mPercentageProgressSpriteSettings.spriteHeight,
-                        (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
+    lcd_PushColors_Rotated_90(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth,
+                              mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight,
+                              mPercentageProgressSpriteSettings.spriteWidth,
+                              mPercentageProgressSpriteSettings.spriteHeight,
+                              (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
 }
 
 void PlayState::updateProgressBar(float progress) {
@@ -307,5 +308,5 @@ void PlayState::updateProgressBar(float progress) {
 
     mProgressBarBackgroundSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0);
     mProgressBarSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0, TFT_BLACK);
-    mAmoled->pushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarMixedSprite.getPointer());
+    lcd_PushColors_Rotated_90(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarMixedSprite.getPointer());
 }

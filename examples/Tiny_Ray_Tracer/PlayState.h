@@ -1,7 +1,6 @@
 #ifndef PLAY_STATE_H
 #define PLAY_STATE_H
 
-#include <LilyGo_AMOLED.h>
 #include <TFT_eSPI.h>
 
 #include "State.h"
@@ -17,7 +16,6 @@ class PlayState : public State
 public:
 
    PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-             LilyGo_Class* amoled,
              TFT_eSPI& tft,
              uint16_t screenWidth,
              uint16_t screenHeight);
@@ -41,8 +39,6 @@ private:
    void updateProgressBar(float progress);
 
    std::shared_ptr<FiniteStateMachine> mFSM;
-
-   LilyGo_Class*                       mAmoled;
 
    const uint16_t                      mScreenWidth;
    const uint16_t                      mScreenHeight;

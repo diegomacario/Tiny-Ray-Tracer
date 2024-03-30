@@ -1,25 +1,30 @@
-#include <LilyGo_AMOLED.h>
+#include "rm67162.h"
 #include <TFT_eSPI.h>
 
 #include "Game.h"
 
-LilyGo_Class amoled;
+#define TE_pin 9
+#define display_enable_pin 38
 
 TFT_eSPI tft = TFT_eSPI();
 
 Game game;
 
+void IRAM_ATTR ISR();
+
 void setup()
 {
-    Serial.begin(115200);
+    pinMode(display_enable_pin, OUTPUT);
+    digitalWrite(display_enable_pin, HIGH);
+    pinMode(TE_pin, INPUT);
+    Serial.begin(115000); // 115200?
+    rm67162_init();
 
-    if (!amoled.begin()) {
-        while (1) {
-            Serial.println("There is a problem with the device!"); delay(1000);
-        }
-    }
+    attachInterrupt(TE_pin, ISR, RISING);
 
-    game.initialize(&amoled, tft, amoled.height(), amoled.width());
+    uint16_t height = 240;
+    uint16_t width = 536;
+    game.initialize(tft, width, height);
 }
 
 void loop()

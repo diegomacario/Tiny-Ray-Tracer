@@ -1,14 +1,14 @@
 #include <algorithm>
 
+#include "rm67162.h"
+
 #include "MenuState.h"
 
 MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachine,
-                     LilyGo_Class* amoled,
                      TFT_eSPI& tft,
                      uint16_t screenWidth,
                      uint16_t screenHeight)
    : mFSM(finiteStateMachine)
-   , mAmoled(amoled)
    , mScreenWidth(screenWidth)
    , mScreenHeight(screenHeight)
    , mNumRows(4)
@@ -88,7 +88,7 @@ void MenuState::enter()
 {
    mResetScreenSprite.createSprite(mScreenWidth, mScreenHeight);
    mResetScreenSprite.fillSprite(TFT_BLACK);
-   mAmoled->pushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mResetScreenSprite.getPointer());
+   lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t*)mResetScreenSprite.getPointer());
    mResetScreenSprite.deleteSprite();
 
    for (int32_t cellIndex = 0; cellIndex < mCells.size(); ++cellIndex) {
@@ -108,7 +108,7 @@ void MenuState::enter()
       //mCellSprites[cellIndex].drawRoundRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), mCellRadius, TFT_WHITE);
       mCellSprites[cellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
       mCellSprites[cellIndex].drawString(mCells[cellIndex].mText.c_str(), mCells[cellIndex].mTextXPos, mCells[cellIndex].mTextYPos);
-      mAmoled->pushColors(mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[cellIndex].getPointer());
+      lcd_PushColors_Rotated_90(mCells[cellIndex].mXPos, mCells[cellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[cellIndex].getPointer());
    }
 
    pinMode(mNextSceneButtonPin, INPUT_PULLDOWN);
@@ -125,7 +125,7 @@ void MenuState::update()
       mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
       mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
 
-      mAmoled->pushColors(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
+      lcd_PushColors_Rotated_90(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
 
       ++mCurrentCellIndex;
       mCurrentCellIndex %= mCells.size();
@@ -136,7 +136,7 @@ void MenuState::update()
       mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
       mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
 
-      mAmoled->pushColors(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
+      lcd_PushColors_Rotated_90(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
    }
 
    bool selectSceneButtonIsPressed = checkSelectSceneButton();
@@ -147,7 +147,7 @@ void MenuState::update()
       mCellSprites[mCurrentCellIndex].drawRect(0, 0, static_cast<int32_t>(mCellWidth), static_cast<int32_t>(mCellHeight), TFT_WHITE);
       mCellSprites[mCurrentCellIndex].drawString(mCells[mCurrentCellIndex].mText.c_str(), mCells[mCurrentCellIndex].mTextXPos, mCells[mCurrentCellIndex].mTextYPos);
 
-      mAmoled->pushColors(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
+      lcd_PushColors_Rotated_90(mCells[mCurrentCellIndex].mXPos, mCells[mCurrentCellIndex].mYPos, static_cast<uint16_t>(mCellWidth), static_cast<uint16_t>(mCellHeight), (uint16_t *)mCellSprites[mCurrentCellIndex].getPointer());
 
       delay(500);
 
