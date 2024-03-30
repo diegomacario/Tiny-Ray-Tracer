@@ -4,32 +4,22 @@
 #include "driver/spi_master.h"
 
 volatile bool TE_flag=false;
+volatile uint8_t frame_count=0;
 
 void IRAM_ATTR ISR() 
 {
+    //TE_flag=digitalRead(9);
     TE_flag=true;
+    frame_count++;
 }
 
-
-
-const static lcd_cmd_t rm67162_spi_init[] = {
-    {0xFE, {0x00}, 0x01},        // PAGE
-    // {0x35, {0x00}, 0x00},     // TE ON
-    // {0x34, {0x00}, 0x00},     // TE OFF
-    {0x36, {0x00}, 0x01},        // Scan Direction Control
-    {0x3A, {0x75}, 0x01},        // Interface Pixel Format	16bit/pixel
-    // {0x3A, {0x76}, 0x01},     // Interface Pixel Format	18bit/pixel
-    // {0x3A, {0x77}, 0x01},     // Interface Pixel Format	24bit/pixel
-    {0x51, {0x00}, 0x01},        // Write Display Brightness MAX_VAL=0XFF
-    {0x11, {0x00}, 0x01 | 0x80}, // Sleep Out
-    {0x29, {0x00}, 0x01 | 0x80}, // Display on
-    {0x51, {0xD0}, 0x01},        // Write Display Brightness	MAX_VAL=0XFF 
-};
+//psram buffer for matrix rotation (536 * 240 * 2)
+uint16_t* qBuffer = (uint16_t*) heap_caps_malloc(257280, MALLOC_CAP_SPIRAM); 
 
 const static lcd_cmd_t rm67162_qspi_init[] = {
     {0x11, {0x00}, 0x80},        // Sleep Out
-    {0x44, {0x02, 23}, 0x02},    // Set_Tear_Scanline to line 535 (0-535)
-    {0x35, {0x00},0x01},         // TE ON
+    {0x44, {0x00, 0}, 0x02},     // Set_Tear_Scanline to line 0
+    {0x35, {0x02},0x01},         // TE ON
     // {0x34, {0x00}, 0x00},     // TE OFF
     // {0x36, {0x00}, 0x01},     // Scan Direction Control
     {0x3A, {0x55}, 0x01},        // Interface Pixel Format	16bit/pixel
@@ -42,48 +32,14 @@ const static lcd_cmd_t rm67162_qspi_init[] = {
 
 static spi_device_handle_t spi;
 
-static void WriteComm(uint8_t data)
-{
-    TFT_CS_L;
-    SPI.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
-    TFT_DC_L;
-    SPI.write(data);
-    TFT_DC_H;
-    SPI.endTransaction();
-    TFT_CS_H;
-}
-
-static void WriteData(uint8_t data)
-{
-    TFT_CS_L;
-    SPI.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
-    TFT_DC_H;
-    SPI.write(data);
-    SPI.endTransaction();
-    TFT_CS_H;
-}
-
-static void WriteData16(uint16_t data)
-{
-	
-    TFT_CS_L;
-    SPI.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
-    TFT_DC_H;
-    SPI.write16(data);
-    SPI.endTransaction();
-    TFT_CS_H;
-}
-
 static void lcd_send_cmd(uint32_t cmd, uint8_t *dat, uint32_t len)
 {
-#if LCD_USB_QSPI_DREVER == 1
     TFT_CS_L;
     spi_transaction_t t;
     memset(&t, 0, sizeof(t));
     t.flags = (SPI_TRANS_MULTILINE_CMD | SPI_TRANS_MULTILINE_ADDR);
     t.cmd = 0x02;
     t.addr = cmd << 8;
-    // Serial.printf("t.addr:0x%X\r\n", t.addr);
     if (len != 0)
     {
         t.tx_buffer = dat;
@@ -96,14 +52,6 @@ static void lcd_send_cmd(uint32_t cmd, uint8_t *dat, uint32_t len)
     }
     spi_device_polling_transmit(spi, &t);
     TFT_CS_H;
-#else
-    WriteComm(cmd);
-    if (len != 0)
-    {
-        for (int i = 0; i < len; i++)
-            WriteData(dat[i]);
-    }
-#endif
 }
 
 void rm67162_init(void)
@@ -116,7 +64,6 @@ void rm67162_init(void)
     TFT_RES_H;
     delay(200);
 
-#if LCD_USB_QSPI_DREVER == 1
     esp_err_t ret;
 
     spi_bus_config_t buscfg = {
@@ -126,8 +73,7 @@ void rm67162_init(void)
         .data2_io_num = TFT_QSPI_D2,
         .data3_io_num = TFT_QSPI_D3,
         .max_transfer_sz = (SEND_BUF_SIZE * 16) + 8,
-        .flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_GPIO_PINS /* |
-                 SPICOMMON_BUSFLAG_QUAD */
+        .flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_GPIO_PINS
         ,
     };
     spi_device_interface_config_t devcfg = {
@@ -136,30 +82,19 @@ void rm67162_init(void)
         .mode = TFT_SPI_MODE,
         .clock_speed_hz = SPI_FREQUENCY,
         .spics_io_num = -1,
-        // .spics_io_num = TFT_QSPI_CS,
         .flags = SPI_DEVICE_HALFDUPLEX,
-        .queue_size = 17,
+        .queue_size = 1,
     };
     ret = spi_bus_initialize(TFT_SPI_HOST, &buscfg, SPI_DMA_CH_AUTO);
     ESP_ERROR_CHECK(ret);
     ret = spi_bus_add_device(TFT_SPI_HOST, &devcfg, &spi);
     ESP_ERROR_CHECK(ret);
 
-#else
-    SPI.begin(TFT_SCK, -1, TFT_MOSI, TFT_CS);
-    SPI.setFrequency(SPI_FREQUENCY);
-    pinMode(TFT_DC, OUTPUT);
-#endif
     // Initialize the screen multiple times to prevent initialization failure
     int i = 3;
     while (i--) {
-#if LCD_USB_QSPI_DREVER == 1
         const lcd_cmd_t *lcd_init = rm67162_qspi_init;
         for (int i = 0; i < sizeof(rm67162_qspi_init) / sizeof(lcd_cmd_t); i++)
-#else
-        const lcd_cmd_t *lcd_init = rm67162_spi_init;
-        for (int i = 0; i < sizeof(rm67162_spi_init) / sizeof(lcd_cmd_t); i++)
-#endif
         {
             lcd_send_cmd(lcd_init[i].cmd,
                          (uint8_t *)lcd_init[i].data,
@@ -169,7 +104,6 @@ void rm67162_init(void)
                 delay(120);
         }
     }
-
 }
 
 void lcd_setRotation(uint8_t r)
@@ -197,9 +131,8 @@ void lcd_setRotation(uint8_t r)
 void lcd_address_set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
     lcd_cmd_t t[3] = {
-        {0x2a, {x1 >> 8, x1, x2 >> 8, x2}, 0x04},
-        {0x2b, {y1 >> 8, y1, y2 >> 8, y2}, 0x04},
-        {0x2c, {0x00}, 0x00},
+        {0x2a, {(uint8_t)(x1 >> 8), (uint8_t)x1, uint8_t(x2 >> 8), (uint8_t)(x2)}, 0x04},
+        {0x2b, {(uint8_t)(y1 >> 8), (uint8_t)(y1), (uint8_t)(y2 >> 8), (uint8_t)(y2)}, 0x04},
     };
 
     for (uint32_t i = 0; i < 3; i++)
@@ -208,13 +141,8 @@ void lcd_address_set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
     }
 }
 
-void lcd_fill(uint16_t xsta,
-              uint16_t ysta,
-              uint16_t xend,
-              uint16_t yend,
-              uint16_t color)
+void lcd_fill(uint16_t xsta, uint16_t ysta, uint16_t xend, uint16_t yend, uint16_t color)
 {
-
     uint16_t w = xend - xsta;
     uint16_t h = yend - ysta;
     uint16_t *color_p = (uint16_t *)heap_caps_malloc(w * h * 2, MALLOC_CAP_INTERNAL);
@@ -229,18 +157,12 @@ void lcd_DrawPoint(uint16_t x, uint16_t y, uint16_t color)
     lcd_PushColors(&color, 1);
 }
 
-void lcd_PushColors(uint16_t x,
-                    uint16_t y,
-                    uint16_t width,
-                    uint16_t high,
-                    uint16_t *data)
+void lcd_PushColors(uint16_t x, uint16_t y, uint16_t width, uint16_t high, uint16_t *data)
 {
-#if LCD_USB_QSPI_DREVER == 1
     bool first_send = 1;
     size_t len = width * high;
     uint16_t *p = (uint16_t *)data;
-
-    lcd_address_set(x, y, x + width - 1, y + high - 1);
+    lcd_address_set(x, y, x + width - 1, y + high - 1);      
     TFT_CS_L;
     do
     {
@@ -249,16 +171,14 @@ void lcd_PushColors(uint16_t x,
         memset(&t, 0, sizeof(t));
         if (first_send)
         {
-            t.base.flags =
-                SPI_TRANS_MODE_QIO /* | SPI_TRANS_MODE_DIOQIO_ADDR */;
-            t.base.cmd = 0x32 /* 0x12 */;
-            t.base.addr = 0x002C00;
+            t.base.flags = SPI_TRANS_MODE_QIO;
+            t.base.cmd = 0x32;
+            t.base.addr = 0x003C00;
             first_send = 0;
         }
         else
         {
-            t.base.flags = SPI_TRANS_MODE_QIO | SPI_TRANS_VARIABLE_CMD |
-                           SPI_TRANS_VARIABLE_ADDR | SPI_TRANS_VARIABLE_DUMMY;
+            t.base.flags = SPI_TRANS_MODE_QIO | SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR | SPI_TRANS_VARIABLE_DUMMY;
             t.command_bits = 0;
             t.address_bits = 0;
             t.dummy_bits = 0;
@@ -269,35 +189,164 @@ void lcd_PushColors(uint16_t x,
         }
         t.base.tx_buffer = p;
         t.base.length = chunk_size * 16;
-
-        
-        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period
-        if(TE_flag==true )  TE_flag=false;    
-
-        //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.
-        while (TE_flag==false) 
-        ;        
 
         spi_device_polling_transmit(spi, (spi_transaction_t *)&t);
         len -= chunk_size;
         p += chunk_size;
-    } while (len > 0);
-    TFT_CS_H;
 
-#else
-    lcd_address_set(x, y, x + width - 1, y + high - 1);
-    TFT_CS_L;
-    SPI.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
-    TFT_DC_H;
-    SPI.writeBytes((uint8_t *)data, width * high * 2);
-    SPI.endTransaction();
+    } while (len > 0);
+
+    //Serial.println(frame_count);
+    frame_count=0;
     TFT_CS_H;
-#endif
 }
+
+
+
+void lcd_PushColors_Rotated_90(uint16_t x, uint16_t y, uint16_t width, uint16_t high, uint16_t *data)
+{
+    uint16_t  _x = 240 - (y + high);
+    uint16_t  _y = x;
+    uint16_t  _h = width;
+    uint16_t  _w = high;
+    lcd_address_set(_x, _y, _x + _w - 1, _y + _h - 1);
+
+    bool first_send = 1;
+    bool frame_top = 1;  
+    size_t len = width * high;
+    uint16_t *p = (uint16_t *)data;
+    uint16_t *q = (uint16_t *)qBuffer;
+    uint32_t index = 0; 
+    
+    for (uint16_t j = 0; j < width; j++)
+    {
+        for (uint16_t i = 0; i < high; i++)
+        {
+            qBuffer[index++] = ((uint16_t)p[width * (high - i - 1) + j]);             
+        }
+    }
+
+    TFT_CS_L;
+    do
+    {
+        size_t chunk_size = len;
+        spi_transaction_ext_t t = {0};
+        memset(&t, 0, sizeof(t));
+        if (first_send)
+        {
+            frame_top = 1;  
+            t.base.flags = SPI_TRANS_MODE_QIO;
+            t.base.cmd = 0x32;
+            t.base.addr = 0x002C00;
+            first_send = 0;
+        }
+        else
+        {
+            t.base.flags = SPI_TRANS_MODE_QIO | SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR | SPI_TRANS_VARIABLE_DUMMY;
+            t.command_bits = 0;
+            t.address_bits = 0;
+            t.dummy_bits = 0;
+        }
+        if (chunk_size > SEND_BUF_SIZE)
+        {
+            chunk_size = SEND_BUF_SIZE;
+        }
+        t.base.tx_buffer = q;
+        t.base.length = chunk_size * 16;
+
+        if(frame_top==1)
+        {   
+        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period.
+        if(TE_flag==true) TE_flag=false;  
+        //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.      
+        while (TE_flag==false) ;
+        frame_top=0;
+        }  
+
+        spi_device_polling_transmit(spi, (spi_transaction_t *)&t);
+        len -= chunk_size;
+        q += chunk_size;
+    } while (len > 0);
+
+    //Serial.println(frame_count);
+    frame_count=0;
+    TFT_CS_H;
+}
+
+
+void lcd_PushColors_Rotated_270(uint16_t x, uint16_t y, uint16_t width, uint16_t high, uint16_t *data)
+{
+    uint16_t  _x = 240 - (y + high);
+    uint16_t  _y = x;
+    uint16_t  _h = width;
+    uint16_t  _w = high;
+    lcd_address_set(_x, _y, _x + _w - 1, _y + _h - 1);
+
+    bool first_send = 1;
+    bool frame_top = 1;  
+    size_t len = width * high;
+    uint16_t *p = (uint16_t *)data;
+    uint16_t *q = (uint16_t *)qBuffer;
+    uint32_t index = 0; 
+    
+    for (uint16_t j = 0; j < width; j++)
+    {
+        for (uint16_t i = 0; i < high; i++)
+        {
+            qBuffer[index++] = ((uint16_t)p[width * (i + 1) - j]);       
+        }
+    }
+
+    TFT_CS_L;
+    do
+    {
+        size_t chunk_size = len;
+        spi_transaction_ext_t t = {0};
+        memset(&t, 0, sizeof(t));
+        if (first_send)
+        {
+            frame_top = 1;  
+            t.base.flags = SPI_TRANS_MODE_QIO;
+            t.base.cmd = 0x32;
+            t.base.addr = 0x002C00;
+            first_send = 0;
+        }
+        else
+        {
+            t.base.flags = SPI_TRANS_MODE_QIO | SPI_TRANS_VARIABLE_CMD | SPI_TRANS_VARIABLE_ADDR | SPI_TRANS_VARIABLE_DUMMY;
+            t.command_bits = 0;
+            t.address_bits = 0;
+            t.dummy_bits = 0;
+        }
+        if (chunk_size > SEND_BUF_SIZE)
+        {
+            chunk_size = SEND_BUF_SIZE;
+        }
+        t.base.tx_buffer = q;
+        t.base.length = chunk_size * 16;
+
+        if(frame_top==1)
+        {   
+        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period.
+        if(TE_flag==true) TE_flag=false; 
+        //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.      
+        while (TE_flag==false) ;
+        frame_top=0;
+        }  
+
+        spi_device_polling_transmit(spi, (spi_transaction_t *)&t);
+        len -= chunk_size;
+        q += chunk_size;
+    } while (len > 0);
+
+    //Serial.println(frame_count);
+    frame_count=0;
+    TFT_CS_H;
+}
+
 
 void lcd_PushColors(uint16_t *data, uint32_t len)
 {
-#if LCD_USB_QSPI_DREVER == 1
     bool first_send = 1;
     uint16_t *p = (uint16_t *)data;
     TFT_CS_L;
@@ -308,9 +357,8 @@ void lcd_PushColors(uint16_t *data, uint32_t len)
         memset(&t, 0, sizeof(t));
         if (first_send)
         {
-            t.base.flags =
-                SPI_TRANS_MODE_QIO /* | SPI_TRANS_MODE_DIOQIO_ADDR */;
-            t.base.cmd = 0x32 /* 0x12 */;
+            t.base.flags = SPI_TRANS_MODE_QIO;
+            t.base.cmd = 0x32;
             t.base.addr = 0x002C00;
             first_send = 0;
         }
@@ -329,7 +377,7 @@ void lcd_PushColors(uint16_t *data, uint32_t len)
         t.base.tx_buffer = p;
         t.base.length = chunk_size * 16;
 
-        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period
+        //if TE_flag is high then cancel and wait for the next one as we might be half way thru the blanking period.
         if(TE_flag==true )  TE_flag=false;    
 
         //infinite loop until TE_flag goes high again. We need to start transmission on the rising edge of TE.
@@ -342,68 +390,19 @@ void lcd_PushColors(uint16_t *data, uint32_t len)
         p += chunk_size;
     } while (len > 0);
     TFT_CS_H;
-
-#else
-    TFT_CS_L;
-    SPI.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
-    TFT_DC_H;
-    SPI.writeBytes((uint8_t *)data, len * 2);
-    SPI.endTransaction();
-    TFT_CS_H;
-#endif
 }
 
-void lcd_sleep()
-{
-    lcd_send_cmd(0x10, NULL, 0);
-}
+void lcd_sleep() {lcd_send_cmd(0x10, NULL, 0);}
+void lcd_brightness(uint8_t bright) {lcd_send_cmd(0x51, &bright, 0x01);}	
+void lcd_display_off() {lcd_send_cmd(0x28, NULL, 0x01);}
+void lcd_display_on() {lcd_send_cmd(0x29, NULL, 0x01);}
+void lcd_display_invert_on() {lcd_send_cmd(0x21, NULL, 0x01);}
+void lcd_display_invert_off() {lcd_send_cmd(0x20, NULL, 0x01);}
 
-void lcd_brightness(uint8_t bright)
-{
-    lcd_send_cmd(0x51, &bright, 0x01);
-}
 
-void lcd_set_colour_enhance(uint8_t enh)
-{
-	lcd_send_cmd(0x58, &enh, 0x01);
-}	
-	
-void lcd_display_off()
-{
-	lcd_send_cmd(0x28, NULL, 0x01);
-}
-
-void lcd_display_on()
-{
-	lcd_send_cmd(0x29, NULL, 0x01);
-}
-
-void lcd_display_invert_on()
-{
-	lcd_send_cmd(0x21, NULL, 0x01);
-}
-
-void lcd_display_invert_off()
-{
-	lcd_send_cmd(0x20, NULL, 0x01);
-}
-
-void lcd_display_set_colour_enhance_low_byte(uint8_t ce_low_byte)
-{
-	lcd_send_cmd(0x5A, &ce_low_byte, 0x01);
-}
-
-void lcd_display_set_colour_enhance_high_byte(uint8_t ce_high_byte)      
-{
-	lcd_send_cmd(0x5B, &ce_high_byte, 0x01);
-}
-
-void lcd_display_high_brightness_mode_on(uint8_t hbm_en)
-{
-	lcd_send_cmd(0xB0, &hbm_en, 0x01);
-}
-
-void lcd_display_high_brightness_mode_off(uint8_t hbm_en)
-{
-  lcd_send_cmd(0xB0, &hbm_en, 0x01);
-}
+//experimental
+void lcd_display_set_colour_enhance_low_byte(uint8_t ce_low_byte) {lcd_send_cmd(0x5A, &ce_low_byte, 0x01);}
+void lcd_display_set_colour_enhance_high_byte(uint8_t ce_high_byte) {lcd_send_cmd(0x5B, &ce_high_byte, 0x01);}
+void lcd_display_high_brightness_mode_on(uint8_t hbm_en) {lcd_send_cmd(0xB0, &hbm_en, 0x01);}
+void lcd_display_high_brightness_mode_off(uint8_t hbm_en) {lcd_send_cmd(0xB0, &hbm_en, 0x01);}
+void lcd_set_colour_enhance(uint8_t enh) {lcd_send_cmd(0x58, &enh, 0x01);}	
