@@ -177,9 +177,7 @@ void PlayState::update()
 
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
-         //mAmoled->setAddrWindow(mSample.x, mSample.y, mSample.x, mSample.y);
-         //mAmoled->pushColors(pixelPtr, 1);
-         lcd_DrawPoint(mSample.x, mSample.y, *pixelPtr);
+         lcd_PushColors_Rotated_90(mSample.x, mSample.y, 1, 1, pixelPtr);
       }
 
       float progress = mSampleGenerator.getProgress();
