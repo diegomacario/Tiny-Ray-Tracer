@@ -152,7 +152,7 @@ void GIFDraw(GIFDRAW *pDraw)
         //tft.setAddrWindow(pDraw->iX + x, y, iCount, 1);
         //tft.pushPixels(usTemp, iCount);
 
-        lcd_address_set(pDraw->iX + x, y, iCount, 1);
+        lcd_address_set(pDraw->iX + x, y, pDraw->iX + x + iCount, y + 1);
         lcd_PushColors(&usTemp[0][0], iCount);
 
         x += iCount;
@@ -190,7 +190,7 @@ void GIFDraw(GIFDRAW *pDraw)
     // tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
     // tft.pushPixels(&usTemp[0][0], iCount);
 
-    lcd_address_set(pDraw->iX, y, iWidth, 1);
+    lcd_address_set(pDraw->iX, y, pDraw->iX + iWidth, y + 1);
     lcd_PushColors(&usTemp[0][0], iCount);
 #endif
 
