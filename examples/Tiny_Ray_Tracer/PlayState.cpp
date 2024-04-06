@@ -55,6 +55,8 @@ PlayState::PlayState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
 
 void PlayState::enter()
 {
+   lcd_setRotation(1);
+   
    mImageRenderingSprite.createSprite(mScreenWidth, mScreenHeight);
    mImageRenderingSprite.fillSprite(TFT_BLACK);
 
@@ -122,7 +124,7 @@ void PlayState::enter()
 
    pinMode(mCancelRenderButtonPin, INPUT_PULLDOWN);
 
-   lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+   lcd_PushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
 }
 
 void PlayState::update()
@@ -177,7 +179,7 @@ void PlayState::update()
 
          uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
          uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
-         lcd_PushColors_Rotated_90(mSample.x, mSample.y, 1, 1, pixelPtr);
+         lcd_DrawPoint(mSample.x, mSample.y, *pixelPtr);
       }
 
       float progress = mSampleGenerator.getProgress();
@@ -192,11 +194,11 @@ void PlayState::update()
       mRayTracingLabelSprite.drawString(doneString.c_str(), 0, 0);
       mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
       mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-      lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+      lcd_PushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
 
       delay(2000);
 
-      lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
+      lcd_PushColors(0, 0, mScreenWidth, mScreenHeight, (uint16_t *)mImageRenderingSprite.getPointer());
       mDoOnce = false;
    }
 }
@@ -270,13 +272,13 @@ void PlayState::updateRayTracingSprite() {
         mRayTracingLabelSprite.drawString(rayTracingString.c_str(), 0, 0);
         mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
         mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-        lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+        lcd_PushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
         mLastTimeRayTracingSpriteWasUpdated = millis();
         mRayTracingLabelBackgroundSpriteChanged = false;
     } else if (mRayTracingLabelBackgroundSpriteChanged) {
         mRayTracingLabelBackgroundSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0);
         mRayTracingLabelSprite.pushToSprite(&mRayTracingLabelMixedSprite, 0, 0, TFT_BLACK);
-        lcd_PushColors_Rotated_90(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
+        lcd_PushColors(0, 0, mRayTracingSpriteSettings.spriteWidth, mRayTracingSpriteSettings.spriteHeight, (uint16_t *)mRayTracingLabelMixedSprite.getPointer());
         mRayTracingLabelBackgroundSpriteChanged = false;
     }
 }
@@ -290,11 +292,11 @@ void PlayState::updatePercentageProgressSprite(float progress) {
     mPercentageProgressLabelSprite.drawString(numberAsString.c_str(), mPercentageProgressSpriteSettings.spriteWidth, 0);
     mPercentageProgressLabelBackgroundSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0);
     mPercentageProgressLabelSprite.pushToSprite(&mPercentageProgressLabelMixedSprite, 0, 0, TFT_BLACK);
-    lcd_PushColors_Rotated_90(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth,
-                              mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight,
-                              mPercentageProgressSpriteSettings.spriteWidth,
-                              mPercentageProgressSpriteSettings.spriteHeight,
-                              (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
+    lcd_PushColors(mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth,
+                   mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight,
+                   mPercentageProgressSpriteSettings.spriteWidth,
+                   mPercentageProgressSpriteSettings.spriteHeight,
+                   (uint16_t *)mPercentageProgressLabelMixedSprite.getPointer());
 }
 
 void PlayState::updateProgressBar(float progress) {
@@ -306,5 +308,5 @@ void PlayState::updateProgressBar(float progress) {
 
     mProgressBarBackgroundSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0);
     mProgressBarSprite.pushToSprite(&mProgressBarMixedSprite, 0, 0, TFT_BLACK);
-    lcd_PushColors_Rotated_90(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarMixedSprite.getPointer());
+    lcd_PushColors(mProgressBarXPosition, mProgressBarYPosition, mProgressBarWidth, mProgressBarHeight, (uint16_t *)mProgressBarMixedSprite.getPointer());
 }

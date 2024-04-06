@@ -86,6 +86,8 @@ MenuState::MenuState(const std::shared_ptr<FiniteStateMachine>& finiteStateMachi
 
 void MenuState::enter()
 {
+   lcd_setRotation(0);
+
    mResetScreenSprite.createSprite(mScreenWidth, mScreenHeight);
    mResetScreenSprite.fillSprite(TFT_BLACK);
    lcd_PushColors_Rotated_90(0, 0, mScreenWidth, mScreenHeight, (uint16_t*)mResetScreenSprite.getPointer());
