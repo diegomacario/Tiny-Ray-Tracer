@@ -137,49 +137,56 @@ void PlayState::update()
 
    if (mSampleGenerator.sampleIsAvailable())
    {
-      mSampleGenerator.generateSample(mSample);
-      mRayGenerator.generateRay(mSample, mRay);
+      bool renderedPixel = false;
 
-      // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
-      // If not, the current pixel remains black
-      if (mScene->findNearestIntersection(mRay, &mIntersection))
+      while (!renderedPixel && mSampleGenerator.sampleIsAvailable())
       {
-         Colour pixelColour = mScene->calculateLightingAtIntersection(mSceneDesc->getEye(), &mIntersection);
+         mSampleGenerator.generateSample(mSample);
+         mRayGenerator.generateRay(mSample, mRay);
 
-         uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColour.r, 255.0f));
-         uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColour.g, 255.0f));
-         uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
-         uint32_t colour = rgb888ToRgb565(r, g, b);
+         // If the current ray intersects an object, we calculate the lighting at the intersection point and store the colour
+         // If not, the current pixel remains black
+         if (mScene->findNearestIntersection(mRay, &mIntersection))
+         {
+            Colour pixelColour = mScene->calculateLightingAtIntersection(mSceneDesc->getEye(), &mIntersection);
 
-         mImageRenderingSprite.drawPixel(mSample.x, mSample.y, colour);
+            uint8_t r = static_cast<uint8_t>(std::min(255 * pixelColour.r, 255.0f));
+            uint8_t g = static_cast<uint8_t>(std::min(255 * pixelColour.g, 255.0f));
+            uint8_t b = static_cast<uint8_t>(std::min(255 * pixelColour.b, 255.0f));
+            uint32_t colour = rgb888ToRgb565(r, g, b);
 
-         if ((mSample.x < mRayTracingSpriteSettings.spriteWidth) && (mSample.y < mRayTracingSpriteSettings.spriteHeight)) {
-            // We rendered a pixel that's behind mRayTracingLabelSprite
-            // Let's save it in mRayTracingLabelBackgroundSprite
-            mRayTracingLabelBackgroundSprite.drawPixel(mSample.x, mSample.y, colour);
-            mRayTracingLabelBackgroundSpriteChanged = true;
+            mImageRenderingSprite.drawPixel(mSample.x, mSample.y, colour);
+
+            if ((mSample.x < mRayTracingSpriteSettings.spriteWidth) && (mSample.y < mRayTracingSpriteSettings.spriteHeight)) {
+               // We rendered a pixel that's behind mRayTracingLabelSprite
+               // Let's save it in mRayTracingLabelBackgroundSprite
+               mRayTracingLabelBackgroundSprite.drawPixel(mSample.x, mSample.y, colour);
+               mRayTracingLabelBackgroundSpriteChanged = true;
+            }
+
+            int32_t percentageProgressLabelXPos = mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth;
+            int32_t percentageProgressLabelYPos = mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight;
+            if ((mSample.x >= percentageProgressLabelXPos) && (mSample.y >= percentageProgressLabelYPos)) {
+               // We rendered a pixel that's behind mPercentageProgressLabelSprite
+               // Let's save it in mPercentageProgressLabelBackgroundSprite
+               mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y - percentageProgressLabelYPos, colour);
+            }
+
+            if ((mSample.x >= mProgressBarXPosition) &&
+                (mSample.x < mProgressBarXPosition + mProgressBarWidth) &&
+                (mSample.y >= mProgressBarYPosition) &&
+                (mSample.y < mProgressBarYPosition + mProgressBarHeight)) {
+               // We rendered a pixel that's behind mProgressBarSprite
+               // Let's save it in mProgressBarBackgroundSprite
+               mProgressBarBackgroundSprite.drawPixel(mSample.x - mProgressBarXPosition, mSample.y - mProgressBarYPosition, colour);
+            }
+
+            uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
+            uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
+            lcd_DrawPoint(mSample.x, mSample.y, *pixelPtr);
+
+            renderedPixel = true;
          }
-
-         int32_t percentageProgressLabelXPos = mScreenWidth - mPercentageProgressSpriteSettings.spriteWidth;
-         int32_t percentageProgressLabelYPos = mScreenHeight - mPercentageProgressSpriteSettings.spriteHeight;
-         if ((mSample.x >= percentageProgressLabelXPos) && (mSample.y >= percentageProgressLabelYPos)) {
-            // We rendered a pixel that's behind mPercentageProgressLabelSprite
-            // Let's save it in mPercentageProgressLabelBackgroundSprite
-            mPercentageProgressLabelBackgroundSprite.drawPixel(mSample.x - percentageProgressLabelXPos, mSample.y - percentageProgressLabelYPos, colour);
-         }
-
-         if ((mSample.x >= mProgressBarXPosition) &&
-             (mSample.x < mProgressBarXPosition + mProgressBarWidth) &&
-             (mSample.y >= mProgressBarYPosition) &&
-             (mSample.y < mProgressBarYPosition + mProgressBarHeight)) {
-            // We rendered a pixel that's behind mProgressBarSprite
-            // Let's save it in mProgressBarBackgroundSprite
-            mProgressBarBackgroundSprite.drawPixel(mSample.x - mProgressBarXPosition, mSample.y - mProgressBarYPosition, colour);
-         }
-
-         uint16_t* spritePtr = (uint16_t*)mImageRenderingSprite.getPointer();
-         uint16_t* pixelPtr = spritePtr + (mSample.y * mScreenWidth + mSample.x);
-         lcd_DrawPoint(mSample.x, mSample.y, *pixelPtr);
       }
 
       float progress = mSampleGenerator.getProgress();
