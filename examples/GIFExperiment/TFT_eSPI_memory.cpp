@@ -43,18 +43,38 @@ AnimatedGIF gif;
 
 #include <SPI.h>
 #include <TFT_eSPI.h>
+#include "rm67162.h"
+
+#define TE_pin 9
+#define display_enable_pin 38
+
+void IRAM_ATTR ISR();
 
 TFT_eSPI tft = TFT_eSPI();
+TFT_eSprite img = TFT_eSprite(&tft);
 
 void setup() {
   Serial.begin(115200);
 
-  tft.begin();
-#ifdef USE_DMA
-  tft.initDMA();
-#endif
-  tft.setRotation(1);
-  tft.fillScreen(TFT_BLACK);
+//   tft.begin();
+// #ifdef USE_DMA
+//   tft.initDMA();
+// #endif
+//   tft.setRotation(1);
+//   tft.fillScreen(TFT_BLACK);
+
+  pinMode(display_enable_pin, OUTPUT);
+  digitalWrite(display_enable_pin, HIGH);
+  pinMode(TE_pin, INPUT);
+  //Serial.begin(115000);
+  img.createSprite(536, 240);
+  rm67162_init();
+  lcd_setRotation(1);
+
+  attachInterrupt(TE_pin, ISR, RISING);
+
+  img.fillRect(0, 0, 536, 240, TFT_BLACK);
+  lcd_PushColors(0, 0, 536, 240, (uint16_t*)img.getPointer());
 
   gif.begin(BIG_ENDIAN_PIXELS);
 }
@@ -63,8 +83,8 @@ void setup() {
 
 // GIFDraw is called by AnimatedGIF library frame to screen
 
-#define DISPLAY_WIDTH  tft.width()
-#define DISPLAY_HEIGHT tft.height()
+#define DISPLAY_WIDTH  536
+#define DISPLAY_HEIGHT 240
 #define BUFFER_SIZE 256            // Optimum is >= GIF width or integral division of width
 
 #ifdef USE_DMA
@@ -129,8 +149,12 @@ void GIFDraw(GIFDRAW *pDraw)
       if (iCount) // any opaque pixels?
       {
         // DMA would degrtade performance here due to short line segments
-        tft.setAddrWindow(pDraw->iX + x, y, iCount, 1);
-        tft.pushPixels(usTemp, iCount);
+        //tft.setAddrWindow(pDraw->iX + x, y, iCount, 1);
+        //tft.pushPixels(usTemp, iCount);
+
+        lcd_address_set(pDraw->iX + x, y, iCount, 1);
+        lcd_PushColors(&usTemp[0][0], iCount);
+
         x += iCount;
         iCount = 0;
       }
@@ -158,13 +182,16 @@ void GIFDraw(GIFDRAW *pDraw)
       for (iCount = 0; iCount < BUFFER_SIZE; iCount++) usTemp[dmaBuf][iCount] = usPalette[*s++];
 
 #ifdef USE_DMA // 71.6 fps (ST7796 84.5 fps)
-    tft.dmaWait();
-    tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
-    tft.pushPixelsDMA(&usTemp[dmaBuf][0], iCount);
+    // tft.dmaWait();
+    // tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
+    // tft.pushPixelsDMA(&usTemp[dmaBuf][0], iCount);
     dmaBuf = !dmaBuf;
 #else // 57.0 fps
-    tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
-    tft.pushPixels(&usTemp[0][0], iCount);
+    // tft.setAddrWindow(pDraw->iX, y, iWidth, 1);
+    // tft.pushPixels(&usTemp[0][0], iCount);
+
+    lcd_address_set(pDraw->iX, y, iWidth, 1);
+    lcd_PushColors(&usTemp[0][0], iCount);
 #endif
 
     iWidth -= iCount;
@@ -178,11 +205,12 @@ void GIFDraw(GIFDRAW *pDraw)
         for (iCount = 0; iCount < BUFFER_SIZE; iCount++) usTemp[dmaBuf][iCount] = usPalette[*s++];
 
 #ifdef USE_DMA
-      tft.dmaWait();
-      tft.pushPixelsDMA(&usTemp[dmaBuf][0], iCount);
+      // tft.dmaWait();
+      // tft.pushPixelsDMA(&usTemp[dmaBuf][0], iCount);
       dmaBuf = !dmaBuf;
 #else
-      tft.pushPixels(&usTemp[0][0], iCount);
+      // tft.pushPixels(&usTemp[0][0], iCount);
+      lcd_PushColors(&usTemp[0][0], iCount);
 #endif
       iWidth -= iCount;
     }
@@ -198,13 +226,13 @@ void loop()
   if (gif.open((uint8_t *)GIF_IMAGE, sizeof(GIF_IMAGE), GIFDraw))
   {
     Serial.printf("Successfully opened GIF; Canvas size = %d x %d\n", gif.getCanvasWidth(), gif.getCanvasHeight());
-    tft.startWrite(); // The TFT chip select is locked low
+    // tft.startWrite(); // The TFT chip select is locked low
     while (gif.playFrame(true, NULL))
     {
       yield();
     }
     gif.close();
-    tft.endWrite(); // Release TFT chip select for other SPI devices
+    // tft.endWrite(); // Release TFT chip select for other SPI devices
   }
 }
 #else // Test maximum rendering speed
@@ -215,7 +243,7 @@ void loop()
 
   if (gif.open((uint8_t *)GIF_IMAGE, sizeof(GIF_IMAGE), GIFDraw))
   {
-    tft.startWrite(); // For DMA the TFT chip select is locked low
+    // tft.startWrite(); // For DMA the TFT chip select is locked low
     while (gif.playFrame(false, NULL))
     {
       // Each loop renders one frame
@@ -223,7 +251,7 @@ void loop()
       yield();
     }
     gif.close();
-    tft.endWrite(); // Release TFT chip select for other SPI devices
+    // tft.endWrite(); // Release TFT chip select for other SPI devices
     lTime = micros() - lTime;
     Serial.print(iFrames / (lTime / 1000000.0));
     Serial.println(" fps");
