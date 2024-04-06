@@ -5,10 +5,9 @@
 #define TE_pin 9
 #define display_enable_pin 38
 
-uint8_t frame_rate;
-
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite img = TFT_eSprite(&tft);
+TFT_eSprite img2 = TFT_eSprite(&tft);
 
 void IRAM_ATTR ISR();
 
@@ -18,17 +17,16 @@ void setup() {
   pinMode(TE_pin, INPUT);
   Serial.begin(115000);
   img.createSprite(536, 240);
+  img2.createSprite(200, 100);
   rm67162_init();
 
   attachInterrupt(TE_pin, ISR, RISING);
   img.loadFont(hugeFatFont);
+  img2.loadFont(hugeFatFont);
 }
 
 void loop() {
-
-    uint32_t f1; uint32_t f2;
-
-    // 90 degree rotate - Tear free
+    // 90 degree rotate - Fullscreen - Tear free
 
     lcd_setRotation(0);
 
@@ -50,7 +48,7 @@ void loop() {
     lcd_PushColors_Rotated_90(0, 0, 536, 240, (uint16_t*)img.getPointer());
     delay(1000);
 
-    // 90 degree rotate - Fast but not tear free
+    // 90 degree rotate - Fullscreen - Fast but not tear free
 
     lcd_setRotation(1);
 
@@ -70,5 +68,28 @@ void loop() {
     img.setTextColor(TFT_WHITE, TFT_BLUE);
     img.drawString("TEARING TEST",175,100);
     lcd_PushColors(0, 0, 536, 240, (uint16_t*)img.getPointer());
+    delay(1000);
+
+    // 90 degree rotate - Not Fullscreen - Buggy
+
+    int32_t width = 200;
+    int32_t height = 100;
+
+    img2.fillRect(0, 0, width, height, TFT_DARKCYAN);
+    img2.setTextColor(TFT_WHITE, TFT_RED);
+    img2.drawString("TEARING TEST",0,0);
+    lcd_PushColors(0, 0, width, height, (uint16_t*)img2.getPointer());
+    delay(1000);
+        
+    img2.fillRect(0, 0, width, height, TFT_GREENYELLOW);
+    img2.setTextColor(TFT_WHITE, TFT_GREEN);
+    img2.drawString("TEARING TEST",0,0);
+    lcd_PushColors(0, 0, width, height, (uint16_t*)img2.getPointer());
+    delay(1000);
+     
+    img2.fillRect(0, 0, width, height, TFT_PURPLE);
+    img2.setTextColor(TFT_WHITE, TFT_BLUE);
+    img2.drawString("TEARING TEST",0,0);
+    lcd_PushColors(0, 0, width, height, (uint16_t*)img2.getPointer());
     delay(1000);
 }

@@ -173,7 +173,7 @@ void lcd_PushColors(uint16_t x, uint16_t y, uint16_t width, uint16_t high, uint1
         {
             t.base.flags = SPI_TRANS_MODE_QIO;
             t.base.cmd = 0x32;
-            t.base.addr = 0x003C00;
+            t.base.addr = 0x002C00;
             first_send = 0;
         }
         else
